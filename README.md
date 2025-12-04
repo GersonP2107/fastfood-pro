@@ -1,36 +1,169 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FoodFast Pro - Digital Menu & Online Ordering SaaS
 
-## Getting Started
+A modern, scalable SaaS platform for restaurants and food businesses to manage digital menus and accept online orders with WhatsApp notifications.
 
-First, run the development server:
+## 🚀 Features
 
+- **Digital Menu Display**: Beautiful, responsive menu with categories and products
+- **Shopping Cart**: Real-time cart with modifier support
+- **Online Ordering**: Complete checkout flow with customer information
+- **WhatsApp Notifications**: Automatic order notifications to merchants
+- **Multi-Tenant**: Support for multiple restaurants on a single platform
+- **Admin Dashboard**: Manage products, categories, and orders (coming soon)
+- **Mobile-First Design**: Optimized for mobile devices
+- **Premium UI/UX**: Modern design with glassmorphism and micro-animations
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions, Storage)
+- **State Management**: Zustand
+- **Forms**: React Hook Form + Zod
+- **Icons**: Lucide React
+- **Deployment**: VPS (Frontend) + Supabase Cloud (Backend)
+
+## 📋 Prerequisites
+
+- Node.js 20.x or later
+- npm or yarn
+- Supabase account
+- WhatsApp Business API credentials (optional)
+
+## 🔧 Installation
+
+1. **Clone the repository**:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd digital-menu
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install dependencies**:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Set up environment variables**:
+```bash
+cp env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Edit `.env.local` with your Supabase credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
 
-## Learn More
+4. **Set up Supabase**:
+- Follow the instructions in `supabase-setup.md` (in artifacts)
+- Run the database schema from `database-schema.sql`
+- Apply RLS policies from `rls-policies.sql`
+- Deploy the Edge Function from `edge-function-order-notification.ts`
 
-To learn more about Next.js, take a look at the following resources:
+5. **Run the development server**:
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000) to see the application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📁 Project Structure
 
-## Deploy on Vercel
+```
+digital-menu/
+├── app/                          # Next.js app directory
+│   ├── [merchantSlug]/          # Dynamic merchant menu pages
+│   ├── globals.css              # Global styles
+│   └── layout.tsx               # Root layout
+├── components/
+│   └── menu/                    # Menu components
+│       ├── MenuDisplay.tsx      # Main menu display
+│       ├── ProductCard.tsx      # Product card
+│       ├── CategoryFilter.tsx   # Category filter
+│       ├── ModifierModal.tsx    # Modifier selection modal
+│       └── Cart.tsx             # Shopping cart
+├── lib/
+│   ├── supabase/                # Supabase clients
+│   │   ├── client.ts            # Browser client
+│   │   ├── server.ts            # Server client
+│   │   └── database.types.ts    # Database types
+│   ├── types.ts                 # TypeScript types
+│   ├── cart-store.ts            # Cart state management
+│   └── utils.ts                 # Utility functions
+└── public/                      # Static assets
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🗄️ Database Schema
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The database includes the following tables:
+- `comerciantes` - Merchant information
+- `categorias` - Product categories
+- `productos` - Menu items
+- `modificadores` - Product modifiers (extras)
+- `producto_modificadores` - Product-modifier relationships
+- `ordenes` - Customer orders
+- `orden_items` - Order line items
+- `orden_item_modificadores` - Selected modifiers per order item
+
+See `database-schema.sql` for the complete schema.
+
+## 🔐 Security
+
+- Row Level Security (RLS) policies ensure data isolation between merchants
+- Public read access for active products and categories
+- Authenticated access for merchant admin operations
+- Service role key never exposed to frontend
+
+## 📱 Usage
+
+### For Merchants
+
+1. Create a Supabase account and set up your project
+2. Insert your business data into the `comerciantes` table
+3. Add categories and products via Supabase dashboard or admin panel
+4. Share your menu URL: `yoursite.com/[your-slug]`
+
+### For Customers
+
+1. Visit the merchant's menu URL
+2. Browse products by category
+3. Add items to cart with optional modifiers
+4. Proceed to checkout
+5. Fill in delivery information
+6. Submit order
+7. Merchant receives WhatsApp notification
+
+## 🚀 Deployment
+
+See `DEPLOYMENT.md` (in artifacts) for detailed deployment instructions covering:
+- VPS setup
+- Nginx configuration
+- SSL certificates
+- PM2 process management
+- Supabase production setup
+
+## 📚 Documentation
+
+All documentation is available in the artifacts directory:
+- `implementation_plan.md` - Complete implementation plan
+- `architecture-diagram.md` - System architecture
+- `database-schema.sql` - Database schema
+- `rls-policies.sql` - Security policies
+- `api-endpoints.md` - API documentation
+- `supabase-setup.md` - Supabase setup guide
+- `DEPLOYMENT.md` - Deployment guide
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🙏 Acknowledgments
+
+- Built with [Next.js](https://nextjs.org)
+- Powered by [Supabase](https://supabase.com)
+- Icons by [Lucide](https://lucide.dev)
+
