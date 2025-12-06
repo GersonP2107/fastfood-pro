@@ -43,95 +43,104 @@ export function MerchantMenuClient({ businessman }: MerchantMenuClientProps) {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Modern Header */}
-            <header className="bg-white shadow-sm sticky top-0 z-30">
-                <div className="container mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
-                        {/* Logo and Business Name */}
-                        <div className="flex items-center gap-2">
-                            <div className="relative size-[80px] rounded-xl overflow-hidden bg-gray-100 shadow-2xl border-3 border-white ">
-                                <Image
-                                    src={businessInfo.logo}
-                                    alt={businessInfo.name}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div>
-                                <h2 className="text-sm md:text-2xl font-semibold text-gray-900">
-                                    {businessInfo.name}
-                                </h2>
-                                <button
-                                    onClick={() => setShowInfoModal(true)}
-                                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 mt-1 transition-colors"
-                                >
-                                    <MapPin className="w-4 h-4" />
-                                    <span>{businessInfo.address}</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Info Button - Desktop */}
-                        <div className="hidden md:flex items-center gap-3">
-                            <button
-                                onClick={() => setShowInfoModal(true)}
-                                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium"
-                            >
-                                <Info className="w-5 h-5" />
-                                Información
-                            </button>
-                            <a
-                                href={whatsappLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
-                            >
-                                <MessageCircle className="w-5 h-5" />
-                                WhatsApp
-                            </a>
-                        </div>
-
-                        {/* Info Button - Mobile */}
-                        <button
-                            onClick={() => setShowInfoModal(true)}
-                            className="md:hidden p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                        >
-                            <Info className="w-5 h-5" />
-                        </button>
+            {/* Modern Header with Banner */}
+            <header className="bg-white shadow-md rounded-2xl">{/* Removed sticky positioning */}
+                {/* Banner Image with Logo */}
+                <div className="relative h-32 md:h-40 bg-gradient-to-r from-orange-400 via-amber-300 to-orange-400 overflow-hidden ">
+                    {/* Decorative Pattern */}
+                    <div className="absolute inset-0 opacity-20">
+                        <div className="absolute inset-0" style={{
+                            backgroundImage: `repeating-linear-gradient(
+                                45deg,
+                                transparent,
+                                transparent 10px,
+                                rgba(255,255,255,0.1) 10px,
+                                rgba(255,255,255,0.1) 20px
+                            )`
+                        }} />
                     </div>
-                </div>
-            </header>
 
-            {/* Status Banner */}
-            <div className={`${businessInfo.acceptOrders ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border-b`}>
-                <div className="container mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between gap-4">
-                        {/* Status Info */}
-                        <div className="flex items-center gap-2 text-sm">
-                            <div className={`w-2 h-2 rounded-full ${businessInfo.acceptOrders ? 'bg-green-500' : 'bg-red-500'}`} />
-                            <span className={`font-medium ${businessInfo.acceptOrders ? 'text-green-700' : 'text-red-700'}`}>
-                                {businessInfo.acceptOrders ? 'Abierto ahora' : 'Cerrado'}
-                            </span>
-                            <span className="text-gray-600">•</span>
-                            <Clock className="w-4 h-4 text-gray-600" />
-                            <span className="text-gray-700">
-                                {businessInfo.openingHours} - {businessInfo.closingHours}
+                    {/* Status Badge - Top Left */}
+                    <div className="absolute top-4 left-4 z-10">
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg ${businessInfo.acceptOrders
+                            ? 'bg-white text-green-600'
+                            : 'bg-white text-red-600'
+                            }`}>
+                            <div className={`w-2 h-2 rounded-full ${businessInfo.acceptOrders ? 'bg-green-500' : 'bg-red-500'
+                                }`} />
+                            <span className="font-bold text-sm">
+                                {businessInfo.acceptOrders ? 'Abierto' : 'Cerrado'}
                             </span>
                         </div>
+                    </div>
 
-                        {/* WhatsApp Button - Always visible */}
+                    {/* Contact Info - Top Right */}
+                    <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 items-end">
+                        <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-md">
+                            <div className="flex items-center gap-2 text-sm">
+                                <Phone className="w-4 h-4 text-gray-600" />
+                                <span className="font-medium text-gray-900">{businessInfo.phone}</span>
+                            </div>
+                        </div>
                         <a
                             href={whatsappLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-md hover:shadow-lg"
+                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg shadow-md transition-colors"
                         >
-                            <MessageCircle className="w-4 h-4" />
-                            <span className="hidden sm:inline">WhatsApp</span>
+                            <div className="flex items-center gap-2 text-sm">
+                                <MessageCircle className="w-4 h-4" />
+                                <span className="font-medium">WhatsApp</span>
+                            </div>
                         </a>
                     </div>
+
+                    {/* Logo - Centered at bottom, overlapping */}
+                    <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 z-50">
+                        <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden bg-black shadow-2xl border-4 border-white">
+                            <Image
+                                src={businessInfo.logo}
+                                alt={businessInfo.name}
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                {/* Business Info Section */}
+                <div className="p-5">
+                    <div className="container mx-auto max-w-2xl">
+                        {/* Business Name */}
+                        <h1 className="text-xl md:text-3xl font-bold text-gray-900 text-center mb-3">
+                            {businessInfo.name}
+                        </h1>
+
+                        {/* Address */}
+                        <div className="flex items-center justify-center gap-2 text-gray-600 mb-2">
+                            <MapPin className="w-4 h-4" />
+                            <span className="text-sm">{businessInfo.address}</span>
+                        </div>
+
+                        {/* Delivery Time */}
+                        <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
+                            <Clock className="w-4 h-4" />
+                            <span className="text-sm font-medium">
+                                Entrega 30 - 60min.
+                            </span>
+                        </div>
+
+                        {/* Info Button */}
+                        <button
+                            onClick={() => setShowInfoModal(true)}
+                            className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl transition-colors font-medium border border-gray-200"
+                        >
+                            <Info className="w-5 h-5" />
+                            <span>Información</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
 
             {/* Main Content */}
             <main className="container mx-auto px-4 py-8">

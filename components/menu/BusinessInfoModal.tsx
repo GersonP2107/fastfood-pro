@@ -164,6 +164,40 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo }: BusinessInf
                         </div>
                     </div>
 
+                    {/* Delivery Coverage */}
+                    <div className="border-t border-gray-200 pt-6">
+                        <h4 className="font-semibold text-gray-900 mb-3">Cobertura de entrega</h4>
+                        <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                            <p className="text-xs text-gray-600 mb-3">
+                                Zonas disponibles para domicilio:
+                            </p>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                                {[
+                                    'LA HACIENDA', 'TEQUENDAMA', 'LIMONAR', 'EL DORADO', 'CIUDAD JARDIN',
+                                    'VEGAS DE COMFANDI', 'REPUBLICA DE ISRAEL', 'BELALCAZAR', 'ALAMEDA',
+                                    'PUERTO RELLENA', 'LLANO VERDE', 'CHAMPAGNAT', 'CALICANTO', 'VALLADO',
+                                    'VALLE DEL LILI', 'SANTA HELENA', 'COLSEGUROS', 'UNION', 'CANEY',
+                                    'CAPRI', 'DEPARTAMENTAL', 'MARIANO RAMOS', 'GUADUALES', 'NAPOLES',
+                                    'BOCHALEMA', 'CRISTOBAL COLON', 'CIUDADELA COMFANDI', 'CAMINO REAL',
+                                    'SAUCES', 'CIUDAD MELENDEZ', 'LAS VEGAS', 'PRIMERA DE MAYO',
+                                    'EL REFUGIO', 'CIUDAD PACIFICA', 'SAN JUDAS', 'CUARTO DE LEGUA',
+                                    'CIUDAD CORDOBA', 'GUAYAQUIL', 'JUNIN', 'LOS CAMBULOS', 'CAÑAVERALES',
+                                    'VAYADO', 'SANTA ANITA', 'SAN NICOLAS', 'JARDIN', 'MORICHAL',
+                                    'PAMPALINDA', 'SANTA LIBRADA', 'LA INDEPENDENCIA', 'LIDO',
+                                    'PRADOS DEL LIMONAR', 'CIUDAD 2000', 'EL DIAMANTE', 'GUABAL',
+                                    'BATALLON', 'ANTONIO NARIÑO', 'HACIENDA KACHIPAY', 'LA SELVA',
+                                    'INGENIO', 'PASO ANCHO', 'PANCE', 'CAÑAS GORDAS', 'Meléndez',
+                                    'SAN FERNANDO'
+                                ].map((zone) => (
+                                    <div key={zone} className="flex items-center gap-1">
+                                        <span className="w-1 h-1 bg-green-500 rounded-full flex-shrink-0"></span>
+                                        <span className="text-gray-700">{zone}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Schedule */}
                     <div className="border-t border-gray-200 pt-6">
                         <h4 className="font-semibold text-gray-900 mb-4">Horarios de atención</h4>

@@ -24,6 +24,16 @@ export interface Businessman {
     updated_at: string;
 }
 
+export interface DeliveryZone {
+    id: string;
+    businessman_id: string;
+    zone_name: string;
+    delivery_cost: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Category {
     id: string;
     businessman_id: string;

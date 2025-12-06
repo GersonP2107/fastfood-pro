@@ -155,7 +155,7 @@ export function MenuDisplay({ businessmanId }: MenuDisplayProps) {
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: 0.1 }}
-                                            className="text-lg md:text-xl font-bold mb-6 text-gray-900 pb-2 border-b-2 border-blue-500"
+                                            className="text-lg md:text-xl font-bold mb-6 text-gray-900 pb-2 border-b-2 border-gray-800"
                                         >
                                             {group.categoria.name}
                                         </motion.h2>

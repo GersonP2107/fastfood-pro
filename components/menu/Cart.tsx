@@ -10,13 +10,75 @@ import { ShoppingCart, X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { useCartStore } from '@/lib/cart-store';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
+import { CheckoutSummary } from '@/components/menu/CheckoutSummary';
+import { AddressForm } from '@/components/menu/AddressForm';
 
 export function Cart() {
     const [isOpen, setIsOpen] = useState(false);
+    const [showCustomerForm, setShowCustomerForm] = useState(false);
+    const [showCheckoutSummary, setShowCheckoutSummary] = useState(false);
+    const [showAddressForm, setShowAddressForm] = useState(false);
+    const [serviceType, setServiceType] = useState<'takeout' | 'delivery'>('takeout');
+    const [customerName, setCustomerName] = useState('');
+    const [customerPhone, setCustomerPhone] = useState('');
+    const [deliveryAddress, setDeliveryAddress] = useState('');
+    const [nameError, setNameError] = useState('');
+    const [phoneError, setPhoneError] = useState('');
     const { items, updateQuantity, removeItem, getTotal, getItemCount, clearCart } = useCartStore();
 
     const itemCount = getItemCount();
     const total = getTotal();
+
+    const handleCheckout = (type: 'takeout' | 'delivery') => {
+        setServiceType(type);
+        setShowCustomerForm(true);
+    };
+
+    const validateForm = () => {
+        let isValid = true;
+
+        // Validate name
+        if (!customerName.trim()) {
+            setNameError('Su nombre es requerido');
+            isValid = false;
+        } else {
+            setNameError('');
+        }
+
+        // Validate phone
+        if (!customerPhone.trim()) {
+            setPhoneError('Su número es requerido');
+            isValid = false;
+        } else if (customerPhone.length < 7) {
+            setPhoneError('Número de teléfono inválido');
+            isValid = false;
+        } else {
+            setPhoneError('');
+        }
+
+        return isValid;
+    };
+
+    const handleSubmitCustomerInfo = () => {
+        if (validateForm()) {
+            setShowCustomerForm(false);
+            setIsOpen(false);
+
+            // If delivery, show address form first
+            if (serviceType === 'delivery') {
+                setShowAddressForm(true);
+            } else {
+                setShowCheckoutSummary(true);
+            }
+        }
+    };
+
+    const handleAddressConfirm = (address: string) => {
+        setDeliveryAddress(address);
+        setShowAddressForm(false);
+        setShowCheckoutSummary(true);
+    };
+
 
     return (
         <>
@@ -97,7 +159,7 @@ export function Cart() {
                                     className="flex items-center gap-3"
                                 >
                                     <ShoppingBag className="w-6 h-6" />
-                                    <h2 className="text-2xl font-bold">Tu Pedido</h2>
+                                    <h3 className="text-xl font-bold">Tu Pedido</h3>
                                 </motion.div>
                                 <motion.button
                                     onClick={() => setIsOpen(false)}
@@ -143,12 +205,12 @@ export function Cart() {
                                                         transition: { duration: 0.3 }
                                                     }}
                                                     transition={{ delay: index * 0.05 }}
-                                                    className="bg-gray-50 rounded-2xl p-4 border border-gray-200"
+                                                    className="bg-gray-50 rounded-xl p-3 border border-gray-200"
                                                 >
-                                                    <div className="flex items-start justify-between mb-3">
+                                                    <div className="flex items-start justify-between mb-2">
                                                         <div className="flex-1">
-                                                            <h3 className="font-bold text-gray-800">{item.product.name}</h3>
-                                                            <p className="text-sm text-primary font-semibold mt-1">
+                                                            <h3 className="font-semibold text-sm text-gray-800">{item.product.name}</h3>
+                                                            <p className="text-xs text-primary font-semibold mt-0.5">
                                                                 {formatCurrency(item.product.discount_price || item.product.price)}
                                                             </p>
                                                         </div>
@@ -156,9 +218,9 @@ export function Cart() {
                                                             onClick={() => removeItem(item.product.id)}
                                                             whileHover={{ scale: 1.1, rotate: 10 }}
                                                             whileTap={{ scale: 0.9 }}
-                                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
                                                         >
-                                                            <Trash2 className="w-5 h-5" />
+                                                            <Trash2 className="w-4 h-4" />
                                                         </motion.button>
                                                     </div>
 
@@ -185,21 +247,21 @@ export function Cart() {
 
                                                     {/* Quantity Controls */}
                                                     <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-3 bg-white rounded-xl p-1 border border-gray-200">
+                                                        <div className="flex items-center gap-2 bg-white rounded-lg p-0.5 border border-gray-200">
                                                             <motion.button
                                                                 onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                                                                 whileHover={{ scale: 1.1 }}
                                                                 whileTap={{ scale: 0.9 }}
-                                                                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                                                                className="p-1.5 hover:bg-gray-100 rounded-md transition"
                                                             >
-                                                                <Minus className="w-4 h-4" />
+                                                                <Minus className="w-3 h-3" />
                                                             </motion.button>
                                                             <motion.span
                                                                 key={item.quantity}
                                                                 initial={{ scale: 1.5, color: '#3b82f6' }}
                                                                 animate={{ scale: 1, color: '#1f2937' }}
                                                                 transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                                                                className="font-bold w-8 text-center"
+                                                                className="font-semibold text-sm w-6 text-center"
                                                             >
                                                                 {item.quantity}
                                                             </motion.span>
@@ -207,16 +269,16 @@ export function Cart() {
                                                                 onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                                                                 whileHover={{ scale: 1.1 }}
                                                                 whileTap={{ scale: 0.9 }}
-                                                                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                                                                className="p-1.5 hover:bg-gray-100 rounded-md transition"
                                                             >
-                                                                <Plus className="w-4 h-4" />
+                                                                <Plus className="w-3 h-3" />
                                                             </motion.button>
                                                         </div>
                                                         <motion.span
                                                             key={item.subtotal}
                                                             initial={{ scale: 1.2 }}
                                                             animate={{ scale: 1 }}
-                                                            className="text-lg font-bold text-gray-800"
+                                                            className="text-sm font-bold text-gray-800"
                                                         >
                                                             {formatCurrency(item.subtotal)}
                                                         </motion.span>
@@ -236,39 +298,69 @@ export function Cart() {
                                         animate={{ y: 0, opacity: 1 }}
                                         exit={{ y: 100, opacity: 0 }}
                                         transition={{ type: 'spring', damping: 25 }}
-                                        className="border-t border-gray-200 p-6 bg-gray-50 space-y-4"
+                                        className="border-t border-gray-200 p-4 bg-gray-50 space-y-3 bottom-0"
                                     >
-                                        <div className="flex items-center justify-between text-xl font-bold">
+                                        <div className="flex items-center justify-between text-lg font-bold">
                                             <span className="text-gray-700">Total:</span>
                                             <motion.span
                                                 key={total}
                                                 initial={{ scale: 1.3, color: '#3b82f6' }}
                                                 animate={{ scale: 1, color: 'currentColor' }}
                                                 transition={{ type: "spring", stiffness: 300 }}
-                                                className="text-primary text-3xl"
+                                                className="text-primary text-2xl"
                                             >
                                                 {formatCurrency(total)}
                                             </motion.span>
                                         </div>
 
-                                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                            <Link
-                                                href="/checkout"
-                                                onClick={() => setIsOpen(false)}
-                                                className="block w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-black py-4 rounded-xl font-bold text-lg text-center shadow-lg hover:shadow-xl transition-all duration-300"
-                                            >
-                                                Continuar al Pago
-                                            </Link>
-                                        </motion.div>
+                                        {/* Service Type Selection */}
+                                        <div className="space-y-2">
+                                            <p className="text-center text-xs text-gray-600 font-medium">
+                                                Selecciona el tipo de servicio:
+                                            </p>
 
-                                        <motion.button
-                                            onClick={clearCart}
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            className="w-full text-red-500 hover:bg-red-50 py-3 rounded-xl font-semibold transition"
-                                        >
-                                            Vaciar Carrito
-                                        </motion.button>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {/* Para llevar button */}
+                                                <motion.button
+                                                    onClick={() => handleCheckout('takeout')}
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-gray-800 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
+                                                >
+                                                    <ShoppingBag className="w-4 h-4" />
+                                                    <span>Para llevar</span>
+                                                </motion.button>
+
+                                                {/* A domicilio button */}
+                                                <motion.button
+                                                    onClick={() => handleCheckout('delivery')}
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-gray-800 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
+                                                >
+                                                    <svg
+                                                        className="w-4 h-4"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                                        />
+                                                    </svg>
+                                                    <span>A domicilio</span>
+                                                </motion.button>
+                                            </div>
+
+                                            <p className="text-[10px] text-center text-gray-500 mt-1.5 leading-tight">
+                                                Al hacer clic en un servicio aceptas los{' '}
+                                                <span className="underline">Términos de uso</span> y{' '}
+                                                <span className="underline">Política de privacidad</span>
+                                            </p>
+                                        </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -276,6 +368,141 @@ export function Cart() {
                     </>
                 )}
             </AnimatePresence>
+
+            {/* Customer Information Form Modal */}
+            <AnimatePresence>
+                {showCustomerForm && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+                            onClick={() => setShowCustomerForm(false)}
+                        />
+
+                        {/* Form Modal */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            transition={{ type: 'spring', damping: 25 }}
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl z-50 p-6"
+                        >
+                            {/* Header */}
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                                <button
+                                    onClick={() => setShowCustomerForm(false)}
+                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <h2 className="text-lg font-bold text-gray-900">Agrega tu nombre y teléfono</h2>
+                            </div>
+
+                            {/* Form */}
+                            <div className="space-y-4">
+                                {/* Name Input */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                        Nombre:
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={customerName}
+                                            onChange={(e) => {
+                                                setCustomerName(e.target.value);
+                                                if (nameError) setNameError('');
+                                            }}
+                                            placeholder="Ingresa tu nombre completo"
+                                            className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${nameError
+                                                ? 'border-red-500 focus:border-red-500'
+                                                : 'border-gray-200 focus:border-black'
+                                                }`}
+                                        />
+                                    </div>
+                                    {nameError && (
+                                        <p className="text-xs text-red-500 mt-1">{nameError}</p>
+                                    )}
+                                </div>
+
+                                {/* Phone Input */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                        Teléfono
+                                    </label>
+                                    <div className="flex gap-2">
+                                        {/* Country Selector */}
+                                        <select className="w-24 px-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors">
+                                            <option value="+57">🇨🇴 +57</option>
+                                            <option value="+1">🇺🇸 +1</option>
+                                            <option value="+52">🇲🇽 +52</option>
+                                            <option value="+34">🇪🇸 +34</option>
+                                        </select>
+
+                                        {/* Phone Number */}
+                                        <div className="flex-1">
+                                            <input
+                                                type="tel"
+                                                value={customerPhone}
+                                                onChange={(e) => {
+                                                    setCustomerPhone(e.target.value);
+                                                    if (phoneError) setPhoneError('');
+                                                }}
+                                                placeholder="Número de teléfono"
+                                                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${phoneError
+                                                    ? 'border-red-500 focus:border-red-500'
+                                                    : 'border-gray-200 focus:border-black'
+                                                    }`}
+                                            />
+                                        </div>
+                                    </div>
+                                    {phoneError && (
+                                        <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                                    )}
+                                </div>
+
+                                {/* Submit Button */}
+                                <motion.button
+                                    onClick={handleSubmitCustomerInfo}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="w-full bg-black hover:bg-gray-800 text-white py-4 rounded-xl font-bold text-base transition-all duration-300 shadow-lg mt-6"
+                                >
+                                    Continuar
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
+            {/* Address Form (for delivery) */}
+            <AddressForm
+                isOpen={showAddressForm}
+                onClose={() => setShowAddressForm(false)}
+                onConfirm={handleAddressConfirm}
+                customerName={customerName}
+                customerPhone={customerPhone}
+            />
+
+            {/* Checkout Summary */}
+            <CheckoutSummary
+                isOpen={showCheckoutSummary}
+                onClose={() => setShowCheckoutSummary(false)}
+                customerName={customerName}
+                customerPhone={customerPhone}
+                serviceType={serviceType}
+            />
         </>
     );
 }
