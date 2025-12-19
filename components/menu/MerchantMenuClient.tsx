@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useCartStore } from '@/lib/cart-store';
 import { MenuDisplay } from '@/components/menu/MenuDisplay';
 import { Cart } from '@/components/menu/Cart';
 import { BusinessInfoModal } from '@/components/menu/BusinessInfoModal';
@@ -24,6 +25,15 @@ interface MerchantMenuClientProps {
 
 export function MerchantMenuClient({ businessman }: MerchantMenuClientProps) {
     const [showInfoModal, setShowInfoModal] = useState(false);
+    const { items, clearCart } = useCartStore();
+
+    // Clear cart if it contains items from a different merchant
+    useEffect(() => {
+        if (items.length > 0 && items[0].product.businessman_id !== businessman.id) {
+            clearCart();
+        }
+    }, [businessman.id, items, clearCart]);
+
 
     // Default values to ensure good UX even with missing data
     const businessInfo = {
