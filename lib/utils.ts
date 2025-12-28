@@ -115,3 +115,67 @@ export function getStatusColor(status: string): string {
     };
     return colorMap[status] || 'bg-gray-500';
 }
+
+/**
+ * Generate formatted WhatsApp message for order
+ */
+export function createWhatsAppMessage(
+    orderItems: any[],
+    subtotal: number,
+    total: number,
+    customerData: { name: string; phone: string; address?: string },
+    paymentMethod: { type: string; name?: string },
+    serviceType: 'takeout' | 'delivery',
+    businessName: string,
+    notes?: string
+): string {
+    const line = '--------------------------------';
+
+    // Header
+    let message = `Hola *${businessName}*, soy *${customerData.name}*!\n`;
+    message += `Quiero realizar el siguiente pedido:\n\n`;
+    message += `${line}\n`;
+
+    // Items
+    orderItems.forEach((item) => {
+        message += `*${item.quantity}x ${item.product.name}*\n`;
+
+        // Modifiers
+        if (item.modifiers_selected && item.modifiers_selected.length > 0) {
+            const mods = item.modifiers_selected.map((m: any) => m.name).join(', ');
+            message += `   + ${mods}\n`;
+        }
+
+        // Item Subtotal (Optional, keeps it cleaner to just show total at end, but user might prefer per item)
+        // message += `   $${formatCurrency(item.subtotal)}\n`; 
+    });
+
+    message += `${line}\n`;
+
+    // Totals
+    message += `*Total: ${formatCurrency(total)}*\n\n`;
+
+    // Delivery Info
+    if (serviceType === 'delivery') {
+        message += `📍 *Para Domicilio*\n`;
+        message += `Dirección: ${customerData.address || 'No especificada'}\n`;
+    } else {
+        message += `🛍️ *Para Llevar (Recoger)*\n`;
+    }
+
+    // Customer Info
+    message += `📱 Teléfono: ${customerData.phone}\n`;
+
+    // Payment Method
+    message += `\n💳 *Método de Pago*: ${paymentMethod.type.charAt(0).toUpperCase() + paymentMethod.type.slice(1)}`;
+    if (paymentMethod.name && paymentMethod.type !== 'efectivo') {
+        message += ` (${paymentMethod.name})`;
+    }
+
+    // Notes
+    if (notes) {
+        message += `\n\n📝 *Notas*: ${notes}`;
+    }
+
+    return encodeURIComponent(message);
+}

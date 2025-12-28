@@ -14,6 +14,7 @@ interface AddressFormProps {
     onConfirm: (address: string) => void;
     customerName: string;
     customerPhone: string;
+    onEditCustomerInfo: () => void;
 }
 
 export function AddressForm({
@@ -21,7 +22,8 @@ export function AddressForm({
     onClose,
     onConfirm,
     customerName,
-    customerPhone
+    customerPhone,
+    onEditCustomerInfo
 }: AddressFormProps) {
     const [showCustomerData, setShowCustomerData] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<string>('');
@@ -110,13 +112,13 @@ export function AddressForm({
                                                 <Phone className="w-4 h-4 text-gray-400" />
                                                 <span className="text-gray-700">Teléfono: {customerPhone}</span>
                                             </div>
-                                            <button className="text-sm text-blue-500 font-medium">
+                                            <button
+                                                onClick={onEditCustomerInfo}
+                                                className="text-sm text-blue-500 font-medium"
+                                            >
                                                 @Cambiar
                                             </button>
-                                            <p className="text-xs text-gray-400 flex items-center gap-2">
-                                                <Lock className="w-3 h-3" />
-                                                Por seguridad, ocultamos parte de tus datos
-                                            </p>
+
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -285,8 +287,8 @@ export function AddressForm({
                                 whileTap={isFormValid ? { scale: 0.98 } : {}}
                                 disabled={!isFormValid}
                                 className={`w-full py-4 rounded-xl font-bold text-base transition-all duration-300 ${isFormValid
-                                        ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg'
-                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg'
+                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                     }`}
                             >
                                 Confirmar dirección

@@ -167,7 +167,10 @@ export function MerchantMenuClient({ businessman }: MerchantMenuClientProps) {
             </footer>
 
             {/* Floating Cart */}
-            <Cart />
+            {/* Type assertion needed because businessman from DB might not strictly match the detailed interface yet if DB migration isn't fully reflected in types at runtime, but types.ts is updated so it should be fine. Casting to any or specific type if needed. 
+               The 'businessman' prop here comes from the page props which uses the Businessman type. 
+            */}
+            <Cart businessman={businessman as any} />
 
             {/* Business Info Modal */}
             <BusinessInfoModal

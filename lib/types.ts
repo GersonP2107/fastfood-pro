@@ -22,8 +22,17 @@ export interface Businessman {
     accept_orders: boolean;
     opening_hours?: string;
     closing_hours?: string;
+    payment_methods?: PaymentMethod[];
     created_at: string;
     updated_at: string;
+}
+
+export interface PaymentMethod {
+    type: 'nequi' | 'daviplata' | 'bancolombia' | 'efectivo' | 'otros';
+    name: string;
+    number?: string;
+    instructions?: string;
+    is_active: boolean;
 }
 
 export interface DeliveryZone {
@@ -98,7 +107,7 @@ export interface Order {
     delivery_type: 'delivery' | 'pickup';
     delivery_address?: string;
     delivery_notes?: string;
-    payment_method: 'efectivo' | 'transferencia' | 'tarjeta';
+    payment_method: string;
     subtotal: number;
     shipping_cost: number;
     discount: number;
@@ -166,7 +175,7 @@ export interface CheckoutFormData {
     delivery_type: 'delivery' | 'pickup';
     delivery_address?: string;
     delivery_notes?: string;
-    payment_method: 'efectivo' | 'transferencia' | 'tarjeta';
+    payment_method: string;
 }
 
 // Order Creation Payload
@@ -178,7 +187,7 @@ export interface CreateOrderPayload {
     delivery_type: 'delivery' | 'pickup';
     delivery_address?: string;
     delivery_notes?: string;
-    payment_method: 'efectivo' | 'transferencia' | 'tarjeta';
+    payment_method: string;
     subtotal: number;
     shipping_cost: number;
     discount: number;
