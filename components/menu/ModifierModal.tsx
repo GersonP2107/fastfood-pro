@@ -64,7 +64,7 @@ export function ModifierModal({ producto, onClose, onConfirm }: ModifierModalPro
                 {/* Modifiers List */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-3">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-sm font-semibold text-gray-900">
                             Personaliza tu pedido
                         </h3>
                         <span className="text-sm text-gray-500">
@@ -84,15 +84,15 @@ export function ModifierModal({ producto, onClose, onConfirm }: ModifierModalPro
                                     key={modificador.id}
                                     onClick={() => toggleModifier(modificador.id)}
                                     className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between ${isSelected
-                                            ? 'border-blue-500 bg-blue-50 shadow-md'
-                                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div
                                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected
-                                                    ? 'border-blue-500 bg-blue-500'
-                                                    : 'border-gray-300'
+                                                ? 'border-blue-500 bg-blue-500'
+                                                : 'border-gray-300'
                                                 }`}
                                         >
                                             {isSelected && <Check className="w-4 h-4 text-white" />}

@@ -14,6 +14,8 @@ export interface Businessman {
     phone?: string;
     email?: string;
     address?: string;
+    city?: string;
+    business_type?: string;
     whatsapp_number: string;
     whatsapp_api_token?: string;
     is_active: boolean;

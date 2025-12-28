@@ -1,87 +1,73 @@
 import { createClient } from '@/lib/supabase/server';
-import Link from 'next/link';
 import { Businessman } from '@/lib/types';
+import { BusinessDirectory } from '@/components/landing/BusinessDirectory';
 
 export default async function HomePage() {
   const supabase = await createClient();
 
-  // Fetch all active merchants
-  const { data: businesses } = await supabase
+  // Fetch all active merchants with delivery zones
+  const { data: businesses } = (await supabase
     .from('businessmans')
-    .select('*')
+    .select(`
+      *,
+      delivery_zones (
+        zone_name,
+        is_active
+      )
+    `)
     .eq('is_active', true)
-    .order('business_name') as { data: Businessman[] | null; error: any };
+    .order('business_name')) as { data: (Businessman & { delivery_zones?: { zone_name: string; is_active: boolean }[] })[] | null };
+
+  // Create a map of businessman_id -> zone names for filtering
+  const deliveryZonesMap = new Map<string, string[]>();
+  businesses?.forEach((biz) => {
+    if (biz.delivery_zones) {
+      const activeZones = biz.delivery_zones
+        .filter((z) => z.is_active)
+        .map((z) => z.zone_name);
+      deliveryZonesMap.set(biz.id, activeZones);
+    }
+  });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-12 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+      {/* Hero Section */}
+      <header className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white py-16 px-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
             FoodFast Pro
           </h1>
-          <p className="text-xl text-gray-600">
-            Los mejores restaurantes en un solo lugar.
+          <p className="text-xl md:text-2xl text-orange-50 mb-2">
+            Los mejores restaurantes en un solo lugar
           </p>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {businesses?.map((biz) => (
-            <Link
-              href={`/${biz.slug}`}
-              key={biz.id}
-              className="group block bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100"
-            >
-              <div className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  {biz.logo_url ? (
-                    <img
-                      src={biz.logo_url}
-                      alt={biz.business_name}
-                      className="w-16 h-16 rounded-full object-cover bg-gray-100"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xl">
-                      {biz.business_name.substring(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
-                      {biz.business_name}
-                    </h2>
-                    {biz.accept_orders ? (
-                      <span className="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-50 rounded-full">
-                        Abierto
-                      </span>
-                    ) : (
-                      <span className="inline-block px-2 py-1 text-xs font-semibold text-red-700 bg-red-50 rounded-full">
-                        Cerrado
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {biz.description && (
-                  <p className="text-gray-600 text-sm line-clamp-2 mb-4">
-                    {biz.description}
-                  </p>
-                )}
-
-                <div className="flex items-center text-sm text-gray-500">
-                  <span className="font-medium">Ver Menú &rarr;</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-
-          {(!businesses || businesses.length === 0) && (
-            <div className="col-span-full text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
-              <p className="text-gray-500 text-lg">
-                No hay restaurantes disponibles en este momento.
-              </p>
-            </div>
-          )}
+          <p className="text-orange-100">
+            Encuentra tu comida favorita y ordena con facilidad
+          </p>
         </div>
-      </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-12">
+        <BusinessDirectory
+          businesses={businesses || []}
+          deliveryZones={deliveryZonesMap}
+        />
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-20">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center text-sm text-gray-500">
+            <p className="mb-2">
+              Powered by{' '}
+              <span className="font-semibold text-orange-600">FoodFast Pro</span>
+            </p>
+            <p className="text-xs text-gray-400">
+              Plataforma de menús digitales y pedidos en línea
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
