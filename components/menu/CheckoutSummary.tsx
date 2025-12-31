@@ -83,9 +83,9 @@ export function CheckoutSummary({
                 delivery_notes: comment + (cashAmount ? ` (Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''),
                 payment_method: selectedPaymentMethod.type === 'efectivo'
                     ? `Efectivo ${cashAmount ? `(Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''}`
-                    : selectedPaymentMethod.instructions || selectedPaymentMethod.name, // Use name as fallback description 
+                    : selectedPaymentMethod.instructions || selectedPaymentMethod.name,
                 subtotal: subtotal,
-                shipping_cost: 0, // TODO: Add delivery cost logic
+                shipping_cost: 0,
                 discount: 0,
                 total: total,
                 items: items.map(item => ({
@@ -105,34 +105,39 @@ export function CheckoutSummary({
 
             if (result.error) {
                 console.error('Order creation error:', result.error);
-            } else {
-                console.log('Order created successfully:', result.data);
+                alert('Hubo un error al crear tu pedido. Por favor intenta de nuevo.');
+                setIsSubmitting(false);
+                return; // Stop execution if DB save fails
             }
+
+            console.log('Order created successfully:', result.data);
+
+            // 2. Create WhatsApp Message (Only if DB success)
+            const message = createWhatsAppMessage(
+                items,
+                subtotal,
+                total,
+                customerData,
+                paymentInfo,
+                serviceType,
+                businessman.business_name,
+                comment + (coupon ? ` (Cupón: ${coupon})` : '') + (cashAmount ? `\n\n💵 Paga con: ${formatCurrency(parseInt(cashAmount) || 0)}` : '')
+            );
+
+            // 3. Open WhatsApp
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=${businessman.whatsapp_number}&text=${message}`;
+            window.open(whatsappUrl, '_blank');
+
+            // Close modal and clear cart after successful order
+            // clearCart(); // Uncomment if you want to clear cart
+            onClose();
+
         } catch (error) {
             console.error('Failed to persist order:', error);
-            // We continue flow even if DB fails for MVP
+            alert('Ocurrió un error inesperado via de red. Intenta nuevamente.');
+        } finally {
+            setIsSubmitting(false);
         }
-
-        // 2 Create WhatsApp Message
-        const message = createWhatsAppMessage(
-            items,
-            subtotal,
-            total,
-            customerData,
-            paymentInfo,
-            serviceType,
-            businessman.business_name,
-            comment + (coupon ? ` (Cupón: ${coupon})` : '') + (cashAmount ? `\n\n💵 Paga con: ${formatCurrency(parseInt(cashAmount) || 0)}` : '')
-        );
-
-        setIsSubmitting(false);
-
-        // 3 Open WhatsApp
-        const whatsappUrl = `https://api.whatsapp.com/send?phone=${businessman.whatsapp_number}&text=${message}`;
-        window.open(whatsappUrl, '_blank');
-
-        // Close modal (optional: clear cart?)
-        // onClose();
     };
 
     return (

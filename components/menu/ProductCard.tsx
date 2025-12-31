@@ -168,7 +168,7 @@ export function ProductCard({ product }: ProductCardProps) {
                             whileTap={{ scale: 0.95 }}
                             className={`relative overflow-hidden p-2.5 rounded-lg shadow-lg transition-all duration-300 ${isAdding
                                 ? 'bg-green-500'
-                                : 'bg-black hover:bg-gray-800'
+                                : 'bg-black hover:bg-blue-500 '
                                 } text-white`}
                             aria-label="Agregar al carrito"
                         >

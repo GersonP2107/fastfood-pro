@@ -8,6 +8,8 @@ import { BusinessInfoModal } from '@/components/menu/BusinessInfoModal';
 import { MapPin, Clock, Phone, MessageCircle, Info } from 'lucide-react';
 import Image from 'next/image';
 
+import { DeliveryZone, ScheduleItem } from '@/lib/types';
+
 interface MerchantMenuClientProps {
     businessman: {
         id: string;
@@ -20,10 +22,12 @@ interface MerchantMenuClientProps {
         opening_hours?: string;
         closing_hours?: string;
         accept_orders: boolean;
+        operating_schedule?: ScheduleItem[];
     };
+    deliveryZones: DeliveryZone[];
 }
 
-export function MerchantMenuClient({ businessman }: MerchantMenuClientProps) {
+export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuClientProps) {
     const [showInfoModal, setShowInfoModal] = useState(false);
     const { items, clearCart } = useCartStore();
 
@@ -34,6 +38,34 @@ export function MerchantMenuClient({ businessman }: MerchantMenuClientProps) {
         }
     }, [businessman.id, items, clearCart]);
 
+    // Calculate if currently open considering specific schedule
+    const isOpenNow = (() => {
+        // If master switch is off, it's closed
+        if (businessman.accept_orders === false) return false;
+
+        // If no granular schedule, fall back to master switch
+        if (!businessman.operating_schedule || businessman.operating_schedule.length === 0) {
+            return true; // Or fallback to legacy opening_hours check if implemented
+        }
+
+        const now = new Date();
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const dayName = days[now.getDay()];
+
+        const todaySchedule = businessman.operating_schedule.find(s => s.day === dayName);
+
+        if (!todaySchedule || !todaySchedule.isActive) return false;
+
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+
+        const [openHour, openMinute] = todaySchedule.open.split(':').map(Number);
+        const [closeHour, closeMinute] = todaySchedule.close.split(':').map(Number);
+
+        const openTime = openHour * 60 + openMinute;
+        const closeTime = closeHour * 60 + closeMinute;
+
+        return currentTime >= openTime && currentTime <= closeTime;
+    })();
 
     // Default values to ensure good UX even with missing data
     const businessInfo = {
@@ -45,7 +77,8 @@ export function MerchantMenuClient({ businessman }: MerchantMenuClientProps) {
         address: businessman.address || "Cali, Colombia",
         openingHours: businessman.opening_hours || "09:00",
         closingHours: businessman.closing_hours || "21:00",
-        acceptOrders: businessman.accept_orders ?? true,
+        acceptOrders: isOpenNow,
+        operatingSchedule: businessman.operating_schedule || []
     };
 
     // Format WhatsApp link
@@ -170,13 +203,14 @@ export function MerchantMenuClient({ businessman }: MerchantMenuClientProps) {
             {/* Type assertion needed because businessman from DB might not strictly match the detailed interface yet if DB migration isn't fully reflected in types at runtime, but types.ts is updated so it should be fine. Casting to any or specific type if needed. 
                The 'businessman' prop here comes from the page props which uses the Businessman type. 
             */}
-            <Cart businessman={businessman as any} />
+            <Cart businessman={businessman as any} deliveryZones={deliveryZones} />
 
             {/* Business Info Modal */}
             <BusinessInfoModal
                 isOpen={showInfoModal}
                 onClose={() => setShowInfoModal(false)}
                 businessInfo={businessInfo}
+                deliveryZones={deliveryZones}
             />
         </div>
     );

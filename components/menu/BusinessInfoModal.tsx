@@ -5,6 +5,18 @@
 // ============================================================================
 
 import { X, MapPin, Clock, Phone, MessageCircle, Instagram, Share2 } from 'lucide-react';
+import { DeliveryZone, ScheduleItem } from '@/lib/types';
+import { formatCurrency } from '@/lib/utils';
+
+// Helper to format time (e.g. "08:00" -> "8:00 AM")
+const formatTime12h = (time24: string) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const h = parseInt(hours, 10);
+    const suffix = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${minutes} ${suffix}`;
+};
 
 interface BusinessInfoModalProps {
     isOpen: boolean;
@@ -19,15 +31,18 @@ interface BusinessInfoModalProps {
         openingHours: string;
         closingHours: string;
         acceptOrders: boolean;
+        operatingSchedule: ScheduleItem[];
     };
+    deliveryZones: DeliveryZone[];
 }
 
-export function BusinessInfoModal({ isOpen, onClose, businessInfo }: BusinessInfoModalProps) {
+export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones }: BusinessInfoModalProps) {
     if (!isOpen) return null;
 
     const whatsappLink = `https://api.whatsapp.com/send?phone=${businessInfo.whatsapp}&text=👋 Hola, vengo de tu menú digital.`;
 
     const handleShare = async () => {
+        // ... (existing share logic)
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -43,6 +58,18 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo }: BusinessInf
             navigator.clipboard.writeText(window.location.href);
             alert('¡Enlace copiado al portapapeles!');
         }
+    };
+
+    // Ordered days for display
+    const orderedDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const daysMap: Record<string, string> = {
+        'monday': 'Lunes',
+        'tuesday': 'Martes',
+        'wednesday': 'Miércoles',
+        'thursday': 'Jueves',
+        'friday': 'Viernes',
+        'saturday': 'Sábado',
+        'sunday': 'Domingo'
     };
 
     return (
@@ -172,28 +199,23 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo }: BusinessInf
                                 Zonas disponibles para domicilio:
                             </p>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                                {[
-                                    'LA HACIENDA', 'TEQUENDAMA', 'LIMONAR', 'EL DORADO', 'CIUDAD JARDIN',
-                                    'VEGAS DE COMFANDI', 'REPUBLICA DE ISRAEL', 'BELALCAZAR', 'ALAMEDA',
-                                    'PUERTO RELLENA', 'LLANO VERDE', 'CHAMPAGNAT', 'CALICANTO', 'VALLADO',
-                                    'VALLE DEL LILI', 'SANTA HELENA', 'COLSEGUROS', 'UNION', 'CANEY',
-                                    'CAPRI', 'DEPARTAMENTAL', 'MARIANO RAMOS', 'GUADUALES', 'NAPOLES',
-                                    'BOCHALEMA', 'CRISTOBAL COLON', 'CIUDADELA COMFANDI', 'CAMINO REAL',
-                                    'SAUCES', 'CIUDAD MELENDEZ', 'LAS VEGAS', 'PRIMERA DE MAYO',
-                                    'EL REFUGIO', 'CIUDAD PACIFICA', 'SAN JUDAS', 'CUARTO DE LEGUA',
-                                    'CIUDAD CORDOBA', 'GUAYAQUIL', 'JUNIN', 'LOS CAMBULOS', 'CAÑAVERALES',
-                                    'VAYADO', 'SANTA ANITA', 'SAN NICOLAS', 'JARDIN', 'MORICHAL',
-                                    'PAMPALINDA', 'SANTA LIBRADA', 'LA INDEPENDENCIA', 'LIDO',
-                                    'PRADOS DEL LIMONAR', 'CIUDAD 2000', 'EL DIAMANTE', 'GUABAL',
-                                    'BATALLON', 'ANTONIO NARIÑO', 'HACIENDA KACHIPAY', 'LA SELVA',
-                                    'INGENIO', 'PASO ANCHO', 'PANCE', 'CAÑAS GORDAS', 'Meléndez',
-                                    'SAN FERNANDO'
-                                ].map((zone) => (
-                                    <div key={zone} className="flex items-center gap-1">
-                                        <span className="w-1 h-1 bg-green-500 rounded-full flex-shrink-0"></span>
-                                        <span className="text-gray-700">{zone}</span>
-                                    </div>
-                                ))}
+                                {deliveryZones.length > 0 ? (
+                                    deliveryZones.map((zone) => (
+                                        <div key={zone.id} className="flex items-center gap-1">
+                                            <span className="w-1 h-1 bg-green-500 rounded-full flex-shrink-0"></span>
+                                            <span className="text-gray-700">
+                                                {zone.zone_name}
+                                                <span className="text-gray-400 ml-1">
+                                                    ({formatCurrency(zone.delivery_cost)})
+                                                </span>
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="col-span-3 text-gray-500 italic">
+                                        No hay zonas de cobertura registradas.
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -202,17 +224,32 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo }: BusinessInf
                     <div className="border-t border-gray-200 pt-6">
                         <h4 className="font-semibold text-gray-900 mb-4">Horarios de atención</h4>
                         <div className="space-y-2">
-                            {['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].map((day, index) => (
-                                <div key={day} className="flex items-center justify-between py-2">
-                                    <span className="text-gray-700">{day}</span>
-                                    <div className="flex items-center gap-2 text-gray-900">
-                                        <Clock className="w-4 h-4 text-gray-400" />
-                                        <span className="font-medium">
-                                            {businessInfo.openingHours} - {businessInfo.closingHours}
-                                        </span>
+                            {orderedDays.map((dayKey) => {
+                                const schedule = businessInfo.operatingSchedule.find(s => s.day === dayKey);
+                                const isToday = dayKey === new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+                                return (
+                                    <div key={dayKey} className={`flex items-center justify-between py-2 ${isToday ? 'bg-blue-50 px-2 rounded-lg' : ''}`}>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-gray-700 ${isToday ? 'font-bold text-blue-700' : ''}`}>
+                                                {daysMap[dayKey]}
+                                            </span>
+                                            {isToday && <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-medium">HOY</span>}
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-gray-900">
+                                            <Clock className={`w-4 h-4 ${isToday ? 'text-blue-500' : 'text-gray-400'}`} />
+                                            {schedule && schedule.isActive ? (
+                                                <span className={`font-medium ${isToday ? 'text-blue-900' : ''}`}>
+                                                    {formatTime12h(schedule.open)} - {formatTime12h(schedule.close)}
+                                                </span>
+                                            ) : (
+                                                <span className="text-red-500 font-medium text-sm">Cerrado</span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 

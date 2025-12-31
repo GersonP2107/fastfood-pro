@@ -11,14 +11,15 @@ import { useCartStore } from '@/lib/cart-store';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 import { CheckoutSummary } from '@/components/menu/CheckoutSummary';
-import { Businessman } from '@/lib/types';
+import { Businessman, DeliveryZone } from '@/lib/types';
 import { AddressForm } from '@/components/menu/AddressForm';
 
 interface CartProps {
     businessman: Businessman;
+    deliveryZones: DeliveryZone[];
 }
 
-export function Cart({ businessman }: CartProps) {
+export function Cart({ businessman, deliveryZones }: CartProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [showCustomerForm, setShowCustomerForm] = useState(false);
     const [showCheckoutSummary, setShowCheckoutSummary] = useState(false);
@@ -502,6 +503,7 @@ export function Cart({ businessman }: CartProps) {
                     setShowAddressForm(false);
                     setShowCustomerForm(true);
                 }}
+                deliveryZones={deliveryZones}
             />
 
             {/* Checkout Summary */}

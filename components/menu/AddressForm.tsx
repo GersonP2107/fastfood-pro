@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronUp, ChevronDown, User, Phone, Lock, Plus } from 'lucide-react';
+import { DeliveryZone } from '@/lib/types';
 
 interface AddressFormProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ interface AddressFormProps {
     customerName: string;
     customerPhone: string;
     onEditCustomerInfo: () => void;
+    deliveryZones: DeliveryZone[];
 }
 
 export function AddressForm({
@@ -23,7 +25,8 @@ export function AddressForm({
     onConfirm,
     customerName,
     customerPhone,
-    onEditCustomerInfo
+    onEditCustomerInfo,
+    deliveryZones
 }: AddressFormProps) {
     const [showCustomerData, setShowCustomerData] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<string>('');
@@ -187,74 +190,9 @@ export function AddressForm({
                                                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors appearance-none bg-white text-sm"
                                                 >
                                                     <option value="">Selecciona tu barrio</option>
-                                                    {[
-                                                        { name: 'ALAMEDA', cost: 7000 },
-                                                        { name: 'ANTONIO NARIÑO', cost: 5000 },
-                                                        { name: 'BATALLON', cost: 5000 },
-                                                        { name: 'BELALCAZAR', cost: 5000 },
-                                                        { name: 'BOCHALEMA', cost: 4000 },
-                                                        { name: 'CALICANTO', cost: 3000 },
-                                                        { name: 'CAMINO REAL', cost: 5000 },
-                                                        { name: 'CANEY', cost: 4000 },
-                                                        { name: 'CAÑAS GORDAS', cost: 6000 },
-                                                        { name: 'CAÑAVERALES', cost: 5000 },
-                                                        { name: 'CAPRI', cost: 4000 },
-                                                        { name: 'CHAMPAGNAT', cost: 4000 },
-                                                        { name: 'CIUDAD 2000', cost: 5000 },
-                                                        { name: 'CIUDAD CORDOBA', cost: 5000 },
-                                                        { name: 'CIUDAD JARDIN', cost: 6000 },
-                                                        { name: 'CIUDAD MELENDEZ', cost: 5000 },
-                                                        { name: 'CIUDAD PACIFICA', cost: 5000 },
-                                                        { name: 'CIUDADELA COMFANDI', cost: 5000 },
-                                                        { name: 'COLSEGUROS', cost: 4000 },
-                                                        { name: 'CRISTOBAL COLON', cost: 5000 },
-                                                        { name: 'CUARTO DE LEGUA', cost: 5000 },
-                                                        { name: 'DEPARTAMENTAL', cost: 4000 },
-                                                        { name: 'EL DIAMANTE', cost: 5000 },
-                                                        { name: 'EL DORADO', cost: 6000 },
-                                                        { name: 'EL REFUGIO', cost: 5000 },
-                                                        { name: 'GUABAL', cost: 5000 },
-                                                        { name: 'GUADUALES', cost: 4000 },
-                                                        { name: 'GUAYAQUIL', cost: 5000 },
-                                                        { name: 'HACIENDA KACHIPAY', cost: 6000 },
-                                                        { name: 'INGENIO', cost: 6000 },
-                                                        { name: 'JARDIN', cost: 5000 },
-                                                        { name: 'JUNIN', cost: 5000 },
-                                                        { name: 'LA HACIENDA', cost: 7000 },
-                                                        { name: 'LA INDEPENDENCIA', cost: 5000 },
-                                                        { name: 'LA SELVA', cost: 6000 },
-                                                        { name: 'LAS VEGAS', cost: 5000 },
-                                                        { name: 'LIDO', cost: 5000 },
-                                                        { name: 'LIMONAR', cost: 6000 },
-                                                        { name: 'LLANO VERDE', cost: 4000 },
-                                                        { name: 'LOS CAMBULOS', cost: 5000 },
-                                                        { name: 'MARIANO RAMOS', cost: 4000 },
-                                                        { name: 'MELENDEZ', cost: 5000 },
-                                                        { name: 'MORICHAL', cost: 5000 },
-                                                        { name: 'NAPOLES', cost: 4000 },
-                                                        { name: 'PAMPALINDA', cost: 5000 },
-                                                        { name: 'PANCE', cost: 6000 },
-                                                        { name: 'PASO ANCHO', cost: 6000 },
-                                                        { name: 'PRADOS DEL LIMONAR', cost: 5000 },
-                                                        { name: 'PRIMERA DE MAYO', cost: 5000 },
-                                                        { name: 'PUERTO RELLENA', cost: 4000 },
-                                                        { name: 'REPUBLICA DE ISRAEL', cost: 5000 },
-                                                        { name: 'SAN FERNANDO', cost: 5000 },
-                                                        { name: 'SAN JUDAS', cost: 5000 },
-                                                        { name: 'SAN NICOLAS', cost: 5000 },
-                                                        { name: 'SANTA ANITA', cost: 5000 },
-                                                        { name: 'SANTA HELENA', cost: 4000 },
-                                                        { name: 'SANTA LIBRADA', cost: 5000 },
-                                                        { name: 'SAUCES', cost: 5000 },
-                                                        { name: 'TEQUENDAMA', cost: 7000 },
-                                                        { name: 'UNION', cost: 4000 },
-                                                        { name: 'VALLADO', cost: 4000 },
-                                                        { name: 'VALLE DEL LILI', cost: 4000 },
-                                                        { name: 'VAYADO', cost: 5000 },
-                                                        { name: 'VEGAS DE COMFANDI', cost: 6000 },
-                                                    ].map((zone) => (
-                                                        <option key={zone.name} value={zone.name}>
-                                                            {zone.name} ($ {zone.cost.toLocaleString()})
+                                                    {deliveryZones.map((zone) => (
+                                                        <option key={zone.id} value={zone.zone_name}>
+                                                            {zone.zone_name} ($ {zone.delivery_cost.toLocaleString()})
                                                         </option>
                                                     ))}
                                                 </select>
@@ -296,7 +234,8 @@ export function AddressForm({
                         </div>
                     </motion.div>
                 </>
-            )}
-        </AnimatePresence>
+            )
+            }
+        </AnimatePresence >
     );
 }

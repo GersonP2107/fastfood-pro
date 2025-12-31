@@ -12,18 +12,25 @@ export async function createOrder(payload: CreateOrderPayload): Promise<ApiRespo
             .from('orders')
             .insert({
                 businessman_id: payload.businessman_id,
-                client_name: payload.client_name,
-                client_phone: payload.client_phone,
-                client_email: payload.client_email,
+                customer_name: payload.client_name,
+                customer_phone: payload.client_phone,
+                customer_email: payload.client_email,
                 delivery_type: payload.delivery_type,
                 delivery_address: payload.delivery_address,
                 delivery_notes: payload.delivery_notes,
-                payment_method: payload.payment_method as any,
+                payment_method: (function (method) {
+                    // Map frontend values (efectivo, otros, nequi, etc) to DB constraint allowed values (cash, transfer, card)
+                    const normalized = method.toLowerCase();
+                    if (normalized.includes('efectivo')) return 'cash';
+                    if (normalized.includes('tarjeta')) return 'card';
+                    // Default to transfer for Nequi/Daviplata/Bancolombia/etc as 'transfer' covers 'otros'
+                    return 'transfer';
+                })(payload.payment_method),
                 subtotal: payload.subtotal,
                 shipping_cost: payload.shipping_cost,
                 discount: payload.discount,
                 total: payload.total,
-                status: 'pendiente',
+                status: 'pending',
                 notification_sent: false
             } as any)
             .select()

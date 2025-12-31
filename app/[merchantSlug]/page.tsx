@@ -23,7 +23,16 @@ export default async function MerchantPage(props: PageProps) {
         notFound();
     }
 
-    return <MerchantMenuClient businessman={businessman} />;
+    // Fetch delivery zones for this businessman
+    // Casting to any to avoid "No overload matches this call" due to missing type definition for delivery_zones in generated types
+    const { data: deliveryZones } = await (supabase as any)
+        .from('delivery_zones')
+        .select('*')
+        .eq('businessman_id', businessman.id)
+        .eq('is_active', true)
+        .order('delivery_cost', { ascending: true });
+
+    return <MerchantMenuClient businessman={businessman} deliveryZones={deliveryZones as any[] || []} />;
 }
 
 // Note: generateStaticParams removed to avoid cookies error in development

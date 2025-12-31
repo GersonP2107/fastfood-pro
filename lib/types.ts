@@ -22,9 +22,18 @@ export interface Businessman {
     accept_orders: boolean;
     opening_hours?: string;
     closing_hours?: string;
+    operating_schedule?: ScheduleItem[];
     payment_methods?: PaymentMethod[];
     created_at: string;
     updated_at: string;
+}
+
+export interface ScheduleItem {
+    day: string; // 'monday', 'tuesday', etc.
+    open: string; // 'HH:mm'
+    close: string; // 'HH:mm'
+    label: string; // 'Lunes', 'Martes', etc.
+    isActive: boolean;
 }
 
 export interface PaymentMethod {
