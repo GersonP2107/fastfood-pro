@@ -125,7 +125,7 @@ export function Cart({ businessman, deliveryZones }: CartProps) {
                                 onClick={() => setIsOpen(true)}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                className="flex-1 max-w-md bg-black hover:bg-gray-800 hover:text-black text-white py-3 md:py-4 px-4 md:px-6 rounded-xl font-bold text-sm md:text-base transition-all duration-300 shadow-lg"
+                                className="flex-1 max-w-md bg-black hover:bg-blue-500 text-white py-3 md:py-4 px-4 md:px-6 rounded-xl font-bold text-sm md:text-base transition-all duration-300 shadow-lg"
                             >
                                 Ver mi pedido
                             </motion.button>
@@ -331,7 +331,7 @@ export function Cart({ businessman, deliveryZones }: CartProps) {
                                                     onClick={() => handleCheckout('takeout')}
                                                     whileHover={{ scale: 1.02 }}
                                                     whileTap={{ scale: 0.98 }}
-                                                    className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-gray-800 hover:text-black text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
+                                                    className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-blue-500 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
                                                 >
                                                     <ShoppingBag className="w-4 h-4" />
                                                     <span>Para llevar</span>
@@ -342,7 +342,7 @@ export function Cart({ businessman, deliveryZones }: CartProps) {
                                                     onClick={() => handleCheckout('delivery')}
                                                     whileHover={{ scale: 1.02 }}
                                                     whileTap={{ scale: 0.98 }}
-                                                    className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-gray-800 hover:text-black text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
+                                                    className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-blue-500 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
                                                 >
                                                     <svg
                                                         className="w-4 h-4"
@@ -482,7 +482,7 @@ export function Cart({ businessman, deliveryZones }: CartProps) {
                                     onClick={handleSubmitCustomerInfo}
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="w-full bg-black hover:bg-gray-800 hover:text-black text-white py-4 rounded-xl font-bold text-base transition-all duration-300 shadow-lg mt-6"
+                                    className="w-full bg-black hover:bg-blue-500 text-white py-4 rounded-xl font-bold text-base transition-all duration-300 shadow-lg mt-6"
                                 >
                                     Continuar
                                 </motion.button>

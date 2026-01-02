@@ -380,7 +380,7 @@ export function CheckoutSummary({
                                 whileTap={{ scale: 0.98 }}
                                 disabled={!selectedPaymentMethod || isSubmitting}
                                 className={`w-full py-4 rounded-xl font-bold text-base transition-all duration-300 ${selectedPaymentMethod && !isSubmitting
-                                    ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg'
+                                    ? 'bg-blue-500 hover:bg-blue-500 text-white shadow-lg'
                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                     }`}
                             >

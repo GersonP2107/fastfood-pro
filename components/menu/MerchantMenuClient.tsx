@@ -85,9 +85,9 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
     const whatsappLink = `https://api.whatsapp.com/send?phone=${businessInfo.whatsapp}&text=👋 Hola, vengo de tu menú digital. Deseo realizar un pedido.`;
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Modern Header with Banner */}
-            <header className="bg-white shadow-md rounded-2xl">{/* Removed sticky positioning */}
+            <header className="bg-white shadow-md rounded-2xl relative">{/* Removed sticky positioning */}
                 {/* Banner Image with Logo */}
                 <div className="relative h-32 md:h-40 bg-gradient-to-r from-orange-400 via-amber-300 to-orange-400 overflow-hidden ">
                     {/* Decorative Pattern */}
@@ -138,66 +138,67 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                         </a>
                     </div>
 
-                    {/* Logo - Centered at bottom, overlapping */}
-                    <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 z-50">
-                        <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden bg-black shadow-2xl border-4 border-white">
-                            <Image
-                                src={businessInfo.logo}
-                                alt={businessInfo.name}
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Business Info Section */}
-                <div className="p-5">
-                    <div className="container mx-auto max-w-2xl">
-                        {/* Business Name */}
-                        <h1 className="text-xl md:text-3xl font-bold text-gray-900 text-center mb-3">
-                            {businessInfo.name}
-                        </h1>
-
-                        {/* Address */}
-                        <div className="flex items-center justify-center gap-2 text-gray-600 mb-2">
-                            <MapPin className="w-4 h-4" />
-                            <span className="text-sm">{businessInfo.address}</span>
-                        </div>
-
-                        {/* Delivery Time */}
-                        <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
-                            <Clock className="w-4 h-4" />
-                            <span className="text-sm font-medium">
-                                Entrega 30 - 60min.
-                            </span>
-                        </div>
-
-                        {/* Info Button */}
-                        <button
-                            onClick={() => setShowInfoModal(true)}
-                            className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl transition-colors font-medium border border-gray-200"
-                        >
-                            <Info className="w-5 h-5" />
-                            <span>Información</span>
-                        </button>
-                    </div>
                 </div>
             </header>
 
+            {/* Logo - Moved outside overflow-hidden banner, positioned relative to header */}
+            <div className="absolute top-32 md:top-40 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+                <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden bg-black shadow-2xl border-4 border-white">
+                    <Image
+                        src={businessInfo.logo}
+                        alt={businessInfo.name}
+                        fill
+                        className="object-cover"
+                    />
+                </div>
+            </div>
+
+            {/* Business Info Section */}
+            <div className="p-5">
+                <div className="container mx-auto max-w-2xl">
+                    {/* Business Name */}
+                    <h1 className="text-xl mt-12 md:text-3xl font-bold text-gray-900 text-center mb-3">
+                        {businessInfo.name}
+                    </h1>
+
+                    {/* Address */}
+                    <div className="flex items-center justify-center gap-2 text-gray-600 mb-2">
+                        <MapPin className="w-4 h-4" />
+                        <span className="text-sm">{businessInfo.address}</span>
+                    </div>
+
+                    {/* Delivery Time */}
+                    <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-sm font-medium">
+                            Entrega 30 - 60min.
+                        </span>
+                    </div>
+
+                    {/* Info Button */}
+                    <button
+                        onClick={() => setShowInfoModal(true)}
+                        className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl transition-colors font-medium border border-gray-200"
+                    >
+                        <Info className="w-5 h-5" />
+                        <span>Información</span>
+                    </button>
+                </div>
+            </div>
+
             {/* Main Content */}
-            <main className="container mx-auto px-4 py-8">
+            < main className="container mx-auto px-4 py-8 flex-grow" >
                 <MenuDisplay businessmanId={businessman.id} />
-            </main>
+            </main >
 
             {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 mt-20 bottom-0">
+            < footer className="bg-white border-t border-gray-200 mt-auto" >
                 <div className="container mx-auto px-4 py-6">
                     <div className="text-center text-sm text-gray-500">
                         Powered by <span className="font-semibold text-blue-600">FoodFast Pro</span>
                     </div>
                 </div>
-            </footer>
+            </footer >
 
             {/* Floating Cart */}
             {/* Type assertion needed because businessman from DB might not strictly match the detailed interface yet if DB migration isn't fully reflected in types at runtime, but types.ts is updated so it should be fine. Casting to any or specific type if needed. 
@@ -212,6 +213,6 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                 businessInfo={businessInfo}
                 deliveryZones={deliveryZones}
             />
-        </div>
+        </div >
     );
 }
