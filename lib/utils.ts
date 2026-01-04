@@ -125,7 +125,7 @@ export function createWhatsAppMessage(
     total: number,
     customerData: { name: string; phone: string; address?: string },
     paymentMethod: { type: string; name?: string },
-    serviceType: 'takeout' | 'delivery',
+    serviceType: 'takeout' | 'delivery' | 'dine_in',
     businessName: string,
     notes?: string
 ): string {
@@ -159,6 +159,8 @@ export function createWhatsAppMessage(
     if (serviceType === 'delivery') {
         message += `📍 *Para Domicilio*\n`;
         message += `Dirección: ${customerData.address || 'No especificada'}\n`;
+    } else if (serviceType === 'dine_in') {
+        message += `🍽️ *Para Comer Aquí (Mesa)*\n`;
     } else {
         message += `🛍️ *Para Llevar (Recoger)*\n`;
     }

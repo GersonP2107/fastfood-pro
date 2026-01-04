@@ -14,19 +14,33 @@ import { Loader2, UtensilsCrossed } from 'lucide-react';
 
 interface MenuDisplayProps {
     businessmanId: string;
+    businessmanSlug?: string;
+    initialCategories?: Category[];
+    initialProducts?: Product[];
+    compactMode?: boolean;
 }
 
-export function MenuDisplay({ businessmanId }: MenuDisplayProps) {
-    const [productos, setProductos] = useState<Product[]>([]);
-    const [categorias, setCategorias] = useState<Category[]>([]);
+export function MenuDisplay({
+    businessmanId,
+    initialCategories = [],
+    initialProducts = [],
+    compactMode = false
+}: MenuDisplayProps) {
+    const [productos, setProductos] = useState<Product[]>(initialProducts);
+    const [categorias, setCategorias] = useState<Category[]>(initialCategories);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(initialProducts.length === 0);
     const [error, setError] = useState<string | null>(null);
 
     const supabase = createClient();
 
     useEffect(() => {
         async function fetchMenuData() {
+            if (initialProducts.length > 0 && initialCategories.length > 0) {
+                setLoading(false);
+                return;
+            }
+
             try {
                 setLoading(true);
                 setError(null);
@@ -71,7 +85,7 @@ export function MenuDisplay({ businessmanId }: MenuDisplayProps) {
         }
 
         fetchMenuData();
-    }, [businessmanId]);
+    }, [businessmanId, initialProducts.length, initialCategories.length]);
 
     // Filter products by selected category
     const filteredProductos = selectedCategoryId
@@ -155,11 +169,12 @@ export function MenuDisplay({ businessmanId }: MenuDisplayProps) {
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: 0.1 }}
-                                            className="text-lg md:text-xl font-bold mb-6 text-gray-900 pb-2 border-b-2 border-gray-800"
+                                            className={`text-lg md:text-xl font-bold mb-6 text-gray-900 ${compactMode ? '' : 'pb-2 border-b-2 border-gray-800'
+                                                }`}
                                         >
                                             {group.categoria.name}
                                         </motion.h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className={`grid grid-cols-1 ${compactMode ? 'sm:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
                                             {group.productos.map((producto, index) => (
                                                 <motion.div
                                                     key={producto.id}
@@ -229,6 +244,6 @@ export function MenuDisplay({ businessmanId }: MenuDisplayProps) {
                     )}
                 </AnimatePresence>
             </div>
-        </div>
+        </div >
     );
 }

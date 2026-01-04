@@ -9,6 +9,7 @@ import { MapPin, Clock, Phone, MessageCircle, Info } from 'lucide-react';
 import Image from 'next/image';
 
 import { DeliveryZone, ScheduleItem } from '@/lib/types';
+import { useSearchParams } from 'next/navigation';
 
 interface MerchantMenuClientProps {
     businessman: {
@@ -30,6 +31,8 @@ interface MerchantMenuClientProps {
 export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuClientProps) {
     const [showInfoModal, setShowInfoModal] = useState(false);
     const { items, clearCart } = useCartStore();
+    const searchParams = useSearchParams();
+    const tableNumber = searchParams.get('table');
 
     // Clear cart if it contains items from a different merchant
     useEffect(() => {
@@ -204,7 +207,11 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
             {/* Type assertion needed because businessman from DB might not strictly match the detailed interface yet if DB migration isn't fully reflected in types at runtime, but types.ts is updated so it should be fine. Casting to any or specific type if needed. 
                The 'businessman' prop here comes from the page props which uses the Businessman type. 
             */}
-            <Cart businessman={businessman as any} deliveryZones={deliveryZones} />
+            <Cart
+                businessman={businessman as any}
+                deliveryZones={deliveryZones}
+                tableNumber={tableNumber || undefined}
+            />
 
             {/* Business Info Modal */}
             <BusinessInfoModal

@@ -17,14 +17,18 @@ import { AddressForm } from '@/components/menu/AddressForm';
 interface CartProps {
     businessman: Businessman;
     deliveryZones: DeliveryZone[];
+    tableNumber?: string;
+    isPOS?: boolean;
 }
 
-export function Cart({ businessman, deliveryZones }: CartProps) {
+export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false }: CartProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [showCustomerForm, setShowCustomerForm] = useState(false);
     const [showCheckoutSummary, setShowCheckoutSummary] = useState(false);
     const [showAddressForm, setShowAddressForm] = useState(false);
-    const [serviceType, setServiceType] = useState<'takeout' | 'delivery'>('takeout');
+    const [serviceType, setServiceType] = useState<'takeout' | 'delivery' | 'dine_in'>(
+        tableNumber || isPOS ? 'dine_in' : 'takeout'
+    );
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
     const [deliveryAddress, setDeliveryAddress] = useState('');
@@ -35,7 +39,7 @@ export function Cart({ businessman, deliveryZones }: CartProps) {
     const itemCount = getItemCount();
     const total = getTotal();
 
-    const handleCheckout = (type: 'takeout' | 'delivery') => {
+    const handleCheckout = (type: 'takeout' | 'delivery' | 'dine_in') => {
         setServiceType(type);
         setShowCustomerForm(true);
     };
@@ -325,40 +329,57 @@ export function Cart({ businessman, deliveryZones }: CartProps) {
                                                 Selecciona el tipo de servicio:
                                             </p>
 
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {/* Para llevar button */}
+                                            <div className={`grid ${tableNumber || isPOS ? 'grid-cols-1' : 'grid-cols-3'} gap-2`}>
+                                                {/* Para comer aquí */}
                                                 <motion.button
-                                                    onClick={() => handleCheckout('takeout')}
-                                                    whileHover={{ scale: 1.02 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-blue-500 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
+                                                    onClick={() => (!tableNumber && !isPOS) && handleCheckout('dine_in')}
+                                                    whileHover={{ scale: (tableNumber || isPOS) ? 1 : 1.02 }}
+                                                    whileTap={{ scale: (tableNumber || isPOS) ? 1 : 0.98 }}
+                                                    className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-lg font-semibold text-[10px] hover:bg-blue-500 md:text-xs transition-all duration-300 shadow-lg ${serviceType === 'dine_in' || tableNumber || isPOS ? 'bg-black text-white cursor-default' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                                                 >
-                                                    <ShoppingBag className="w-4 h-4" />
-                                                    <span>Para llevar</span>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                                    </svg>
+                                                    <span>{tableNumber ? `Mesa / Local (${tableNumber})` : 'Mesa / Local'}</span>
                                                 </motion.button>
 
-                                                {/* A domicilio button */}
-                                                <motion.button
-                                                    onClick={() => handleCheckout('delivery')}
-                                                    whileHover={{ scale: 1.02 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-blue-500 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
-                                                >
-                                                    <svg
-                                                        className="w-4 h-4"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                                                        />
-                                                    </svg>
-                                                    <span>A domicilio</span>
-                                                </motion.button>
+                                                {(!tableNumber && !isPOS) && (
+                                                    <>
+                                                        {/* Para llevar button */}
+                                                        <motion.button
+                                                            onClick={() => handleCheckout('takeout')}
+                                                            whileHover={{ scale: 1.02 }}
+                                                            whileTap={{ scale: 0.98 }}
+                                                            className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-blue-500 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
+                                                        >
+                                                            <ShoppingBag className="w-4 h-4" />
+                                                            <span>Para llevar</span>
+                                                        </motion.button>
+
+                                                        {/* A domicilio button */}
+                                                        <motion.button
+                                                            onClick={() => handleCheckout('delivery')}
+                                                            whileHover={{ scale: 1.02 }}
+                                                            whileTap={{ scale: 0.98 }}
+                                                            className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-blue-500 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
+                                                        >
+                                                            <svg
+                                                                className="w-4 h-4"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={2}
+                                                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                                                />
+                                                            </svg>
+                                                            <span>A domicilio</span>
+                                                        </motion.button>
+                                                    </>
+                                                )}
                                             </div>
 
                                             <p className="text-[10px] text-center text-gray-500 mt-1.5 leading-tight">
@@ -515,6 +536,7 @@ export function Cart({ businessman, deliveryZones }: CartProps) {
                 serviceType={serviceType}
                 deliveryAddress={deliveryAddress}
                 businessman={businessman}
+                tableNumber={tableNumber}
                 onEditCustomerInfo={() => {
                     setShowCheckoutSummary(false);
                     setShowCustomerForm(true);

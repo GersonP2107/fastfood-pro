@@ -17,9 +17,10 @@ interface CheckoutSummaryProps {
     onClose: () => void;
     customerName: string;
     customerPhone: string;
-    serviceType: 'takeout' | 'delivery';
+    serviceType: 'takeout' | 'delivery' | 'dine_in';
     deliveryAddress: string;
     businessman: Businessman;
+    tableNumber?: string;
     onEditCustomerInfo: () => void;
 }
 
@@ -31,6 +32,7 @@ export function CheckoutSummary({
     serviceType,
     deliveryAddress,
     businessman,
+    tableNumber,
     onEditCustomerInfo
 }: CheckoutSummaryProps) {
     const { items, getTotal, getItemCount } = useCartStore();
@@ -78,8 +80,9 @@ export function CheckoutSummary({
                 businessman_id: businessman.id,
                 client_name: customerName,
                 client_phone: customerPhone,
-                delivery_type: serviceType === 'takeout' ? 'pickup' : 'delivery',
+                delivery_type: serviceType === 'takeout' ? 'pickup' : (serviceType === 'dine_in' ? 'dine_in' : 'delivery'),
                 delivery_address: deliveryAddress,
+                table_number: tableNumber,
                 delivery_notes: comment + (cashAmount ? ` (Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''),
                 payment_method: selectedPaymentMethod.type === 'efectivo'
                     ? `Efectivo ${cashAmount ? `(Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''}`
@@ -121,7 +124,7 @@ export function CheckoutSummary({
                 paymentInfo,
                 serviceType,
                 businessman.business_name,
-                comment + (coupon ? ` (Cupón: ${coupon})` : '') + (cashAmount ? `\n\n💵 Paga con: ${formatCurrency(parseInt(cashAmount) || 0)}` : '')
+                comment + (coupon ? ` (Cupón: ${coupon})` : '') + (tableNumber ? `\n\n🍽️ Mesa: ${tableNumber}` : '') + (cashAmount ? `\n\n💵 Paga con: ${formatCurrency(parseInt(cashAmount) || 0)}` : '')
             );
 
             // 3. Open WhatsApp
@@ -131,7 +134,6 @@ export function CheckoutSummary({
             // Close modal and clear cart after successful order
             // clearCart(); // Uncomment if you want to clear cart
             onClose();
-
         } catch (error) {
             console.error('Failed to persist order:', error);
             alert('Ocurrió un error inesperado via de red. Intenta nuevamente.');
@@ -166,7 +168,7 @@ export function CheckoutSummary({
                             <div className="flex items-center gap-2">
                                 <Lock className="w-5 h-5" />
                                 <h2 className="text-lg font-bold">
-                                    {serviceType === 'takeout' ? 'Para llevar' : 'A domicilio'}
+                                    {serviceType === 'takeout' ? 'Para llevar' : (serviceType === 'dine_in' ? `Mesa/Local ${tableNumber ? `(${tableNumber})` : ''}` : 'A domicilio')}
                                 </h2>
                             </div>
                             <button

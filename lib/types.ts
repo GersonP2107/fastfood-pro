@@ -26,6 +26,27 @@ export interface Businessman {
     payment_methods?: PaymentMethod[];
     created_at: string;
     updated_at: string;
+    zones?: RestaurantZone[];
+}
+
+export interface RestaurantZone {
+    id: string;
+    businessman_id: string;
+    name: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+    tables?: RestaurantTable[];
+}
+
+export interface RestaurantTable {
+    id: string;
+    zone_id: string;
+    name: string;
+    capacity?: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface ScheduleItem {
@@ -113,8 +134,9 @@ export interface Order {
     client_name: string;
     client_phone: string;
     client_email?: string;
-    delivery_type: 'delivery' | 'pickup';
+    delivery_type: 'delivery' | 'pickup' | 'dine_in';
     delivery_address?: string;
+    table_number?: string;
     delivery_notes?: string;
     payment_method: string;
     subtotal: number;
@@ -181,8 +203,9 @@ export interface CheckoutFormData {
     client_name: string;
     client_phone: string;
     client_email?: string;
-    delivery_type: 'delivery' | 'pickup';
+    delivery_type: 'delivery' | 'pickup' | 'dine_in';
     delivery_address?: string;
+    table_number?: string;
     delivery_notes?: string;
     payment_method: string;
 }
@@ -193,8 +216,9 @@ export interface CreateOrderPayload {
     client_name: string;
     client_phone: string;
     client_email?: string;
-    delivery_type: 'delivery' | 'pickup';
+    delivery_type: 'delivery' | 'pickup' | 'dine_in';
     delivery_address?: string;
+    table_number?: string;
     delivery_notes?: string;
     payment_method: string;
     subtotal: number;

@@ -17,6 +17,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<ApiRespo
                 customer_email: payload.client_email,
                 delivery_type: payload.delivery_type,
                 delivery_address: payload.delivery_address,
+                table_number: payload.table_number,
                 delivery_notes: payload.delivery_notes,
                 payment_method: (function (method) {
                     // Map frontend values (efectivo, otros, nequi, etc) to DB constraint allowed values (cash, transfer, card)
