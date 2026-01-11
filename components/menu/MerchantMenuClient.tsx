@@ -10,6 +10,7 @@ import Image from 'next/image';
 
 import { DeliveryZone, ScheduleItem } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
+import { checkBusinessStatus } from '@/lib/utils';
 
 interface MerchantMenuClientProps {
     businessman: {
@@ -24,6 +25,7 @@ interface MerchantMenuClientProps {
         closing_hours?: string;
         accept_orders: boolean;
         operating_schedule?: ScheduleItem[];
+        delivery_surge_multiplier?: number;
     };
     deliveryZones: DeliveryZone[];
 }
@@ -41,34 +43,8 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
         }
     }, [businessman.id, items, clearCart]);
 
-    // Calculate if currently open considering specific schedule
-    const isOpenNow = (() => {
-        // If master switch is off, it's closed
-        if (businessman.accept_orders === false) return false;
-
-        // If no granular schedule, fall back to master switch
-        if (!businessman.operating_schedule || businessman.operating_schedule.length === 0) {
-            return true; // Or fallback to legacy opening_hours check if implemented
-        }
-
-        const now = new Date();
-        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-        const dayName = days[now.getDay()];
-
-        const todaySchedule = businessman.operating_schedule.find(s => s.day === dayName);
-
-        if (!todaySchedule || !todaySchedule.isActive) return false;
-
-        const currentTime = now.getHours() * 60 + now.getMinutes();
-
-        const [openHour, openMinute] = todaySchedule.open.split(':').map(Number);
-        const [closeHour, closeMinute] = todaySchedule.close.split(':').map(Number);
-
-        const openTime = openHour * 60 + openMinute;
-        const closeTime = closeHour * 60 + closeMinute;
-
-        return currentTime >= openTime && currentTime <= closeTime;
-    })();
+    // Calculate if currently open using shared utility
+    const { isOpen: isOpenNow, message: statusMessage } = checkBusinessStatus(businessman as any); // Cast to any to avoid type mismatch if partial
 
     // Default values to ensure good UX even with missing data
     const businessInfo = {
@@ -81,7 +57,8 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
         openingHours: businessman.opening_hours || "09:00",
         closingHours: businessman.closing_hours || "21:00",
         acceptOrders: isOpenNow,
-        operatingSchedule: businessman.operating_schedule || []
+        operatingSchedule: businessman.operating_schedule || [],
+        deliverySurgeMultiplier: businessman.delivery_surge_multiplier || 1
     };
 
     // Format WhatsApp link
@@ -117,6 +94,11 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                             <span className="font-bold text-sm">
                                 {businessInfo.acceptOrders ? 'Abierto' : 'Cerrado'}
                             </span>
+                            {!businessInfo.acceptOrders && (
+                                <span className="text-xs ml-1 font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                                    {statusMessage.replace('Cerrado. ', '')}
+                                </span>
+                            )}
                         </div>
                     </div>
 

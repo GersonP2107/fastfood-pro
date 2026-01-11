@@ -22,6 +22,7 @@ export function POSMenuClient({
 }: POSMenuClientProps) {
     const { items, clearCart } = useCartStore();
     const [selectedTable, setSelectedTable] = useState<string>('');
+    const [selectedZone, setSelectedZone] = useState<string>('');
 
     // Clear cart if it contains items from a different merchant or context
     // Ideally we might want to persist POS cart differently, but for now reuse store
@@ -31,8 +32,9 @@ export function POSMenuClient({
         }
     }, []);
 
-    const handleTableSelect = (tableNumber: string) => {
+    const handleTableSelect = (tableNumber: string, zoneName: string) => {
         setSelectedTable(tableNumber);
+        setSelectedZone(zoneName);
     };
 
     return (
@@ -88,6 +90,7 @@ export function POSMenuClient({
                 businessman={businessman}
                 deliveryZones={deliveryZones}
                 tableNumber={selectedTable}
+                zoneName={selectedZone}
                 isPOS={true}
             />
         </div>

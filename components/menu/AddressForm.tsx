@@ -12,11 +12,12 @@ import { DeliveryZone } from '@/lib/types';
 interface AddressFormProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (address: string) => void;
+    onConfirm: (address: string, zoneCost: number) => void;
     customerName: string;
     customerPhone: string;
     onEditCustomerInfo: () => void;
     deliveryZones: DeliveryZone[];
+    deliverySurgeMultiplier?: number;
 }
 
 export function AddressForm({
@@ -26,7 +27,8 @@ export function AddressForm({
     customerName,
     customerPhone,
     onEditCustomerInfo,
-    deliveryZones
+    deliveryZones,
+    deliverySurgeMultiplier = 1
 }: AddressFormProps) {
     const [showCustomerData, setShowCustomerData] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<string>('');
@@ -39,12 +41,22 @@ export function AddressForm({
     const [references, setReferences] = useState('');
 
     const handleConfirm = () => {
+        // Find zone cost
+        let zoneCost = 0;
+        if (neighborhood) {
+            const zone = deliveryZones.find(z => z.zone_name === neighborhood);
+            if (zone) {
+                // Apply multiplier to final cost
+                zoneCost = Math.round(zone.delivery_cost * deliverySurgeMultiplier);
+            }
+        }
+
         // Build complete address from form fields
         if (street && number && neighborhood) {
             const fullAddress = `${street} ${number}, ${neighborhood}${references ? `, ${references}` : ''}`;
-            onConfirm(fullAddress);
+            onConfirm(fullAddress, zoneCost);
         } else if (selectedAddress) {
-            onConfirm(selectedAddress);
+            onConfirm(selectedAddress, 0);
         }
     };
 
@@ -192,7 +204,7 @@ export function AddressForm({
                                                     <option value="">Selecciona tu barrio</option>
                                                     {deliveryZones.map((zone) => (
                                                         <option key={zone.id} value={zone.zone_name}>
-                                                            {zone.zone_name} ($ {zone.delivery_cost.toLocaleString()})
+                                                            {zone.zone_name} ($ {(Math.round(zone.delivery_cost * deliverySurgeMultiplier)).toLocaleString()})
                                                         </option>
                                                     ))}
                                                 </select>

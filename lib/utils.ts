@@ -4,6 +4,7 @@
 
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Businessman } from '@/lib/types';
 
 /**
  * Merge Tailwind CSS classes
@@ -180,4 +181,73 @@ export function createWhatsAppMessage(
     }
 
     return encodeURIComponent(message);
+}
+
+/**
+ * Check if the business is currently open based on its schedule
+ */
+export function checkBusinessStatus(businessman: Pick<Businessman, 'accept_orders' | 'operating_schedule'>): {
+    isOpen: boolean;
+    message: string;
+    nextOpenTime?: string;
+} {
+    // 1. Master switch check
+    if (businessman.accept_orders === false) {
+        return {
+            isOpen: false,
+            message: 'El negocio no está aceptando pedidos en este momento.'
+        };
+    }
+
+    // 2. Schedule check
+    // If no schedule is defined, assume open (or rely on master switch)
+    if (!businessman.operating_schedule || businessman.operating_schedule.length === 0) {
+        return {
+            isOpen: true,
+            message: 'Abierto'
+        };
+    }
+
+    const now = new Date();
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const currentDayName = days[now.getDay()];
+
+    const todaySchedule = businessman.operating_schedule.find(s => s.day === currentDayName);
+
+    // If no schedule for today or marked as inactive (closed all day)
+    if (!todaySchedule || !todaySchedule.isActive) {
+        return {
+            isOpen: false,
+            message: 'Cerrado hoy'
+        };
+    }
+
+    // Parse times
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+
+    const [openHour, openMinute] = todaySchedule.open.split(':').map(Number);
+    const [closeHour, closeMinute] = todaySchedule.close.split(':').map(Number);
+
+    const openTime = openHour * 60 + openMinute;
+    const closeTime = closeHour * 60 + closeMinute;
+
+    if (currentTime >= openTime && currentTime <= closeTime) {
+        return {
+            isOpen: true,
+            message: `Abierto hasta las ${todaySchedule.close}`
+        };
+    }
+
+    if (currentTime < openTime) {
+        return {
+            isOpen: false,
+            message: `Cerrado. Abre a las ${todaySchedule.open}`,
+            nextOpenTime: todaySchedule.open
+        };
+    }
+
+    return {
+        isOpen: false,
+        message: 'Cerrado por hoy'
+    };
 }

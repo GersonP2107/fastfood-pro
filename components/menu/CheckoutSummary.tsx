@@ -22,6 +22,7 @@ interface CheckoutSummaryProps {
     businessman: Businessman;
     tableNumber?: string;
     onEditCustomerInfo: () => void;
+    shippingCost: number;
 }
 
 export function CheckoutSummary({
@@ -33,7 +34,8 @@ export function CheckoutSummary({
     deliveryAddress,
     businessman,
     tableNumber,
-    onEditCustomerInfo
+    onEditCustomerInfo,
+    shippingCost
 }: CheckoutSummaryProps) {
     const { items, getTotal, getItemCount } = useCartStore();
     const [showCustomerData, setShowCustomerData] = useState(false);
@@ -46,17 +48,15 @@ export function CheckoutSummary({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Get available payment methods from businessman or use defaults
-    const paymentMethods: PaymentMethod[] = businessman.payment_methods || [
-        { type: 'efectivo', name: 'Efectivo', is_active: true, instructions: 'Paga al momento de recibir.' },
-        { type: 'otros', name: 'Transferencia Bancaria', number: '01726001987', is_active: true, instructions: 'Nequi / DaviPlata / Bancolombia' }
-    ];
+    // Get available payment methods from businessman
+    const paymentMethods: PaymentMethod[] = businessman.payment_methods || [];
 
     const activePaymentMethods = paymentMethods.filter(pm => pm.is_active);
     const selectedPaymentMethod = activePaymentMethods.find(pm => pm.name === selectedPaymentMethodId) || null;
 
     const itemCount = getItemCount();
     const subtotal = getTotal();
-    const total = subtotal + tip;
+    const total = subtotal + tip + shippingCost;
 
     const handleSubmitOrder = async () => {
         if (!selectedPaymentMethod) return;
@@ -86,10 +86,11 @@ export function CheckoutSummary({
                 delivery_notes: comment + (cashAmount ? ` (Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''),
                 payment_method: selectedPaymentMethod.type === 'efectivo'
                     ? `Efectivo ${cashAmount ? `(Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''}`
-                    : selectedPaymentMethod.instructions || selectedPaymentMethod.name,
+                    : selectedPaymentMethod.name,
                 subtotal: subtotal,
-                shipping_cost: 0,
+                shipping_cost: shippingCost,
                 discount: 0,
+                tip: tip,
                 total: total,
                 items: items.map(item => ({
                     product_id: item.product.id,

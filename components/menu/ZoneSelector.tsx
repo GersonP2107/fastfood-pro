@@ -7,7 +7,7 @@ import { ChevronRight, Users } from 'lucide-react';
 
 interface ZoneSelectorProps {
     zones: RestaurantZone[];
-    onTableSelect: (tableName: string) => void;
+    onTableSelect: (tableName: string, zoneName: string) => void;
     selectedTable?: string;
 }
 
@@ -60,7 +60,7 @@ export function ZoneSelector({ zones, onTableSelect, selectedTable }: ZoneSelect
                             return (
                                 <button
                                     key={table.id}
-                                    onClick={() => onTableSelect(table.name)}
+                                    onClick={() => activeZone && onTableSelect(table.name, activeZone.name)}
                                     className={`relative flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all duration-200 ${isSelected
                                         ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md transform scale-105'
                                         : 'border-gray-100 bg-white text-gray-600 hover:border-blue-200 hover:bg-blue-50/50 hover:shadow-sm'

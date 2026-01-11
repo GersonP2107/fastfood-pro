@@ -32,6 +32,7 @@ interface BusinessInfoModalProps {
         closingHours: string;
         acceptOrders: boolean;
         operatingSchedule: ScheduleItem[];
+        deliverySurgeMultiplier?: number;
     };
     deliveryZones: DeliveryZone[];
 }
@@ -206,7 +207,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                                             <span className="text-gray-700">
                                                 {zone.zone_name}
                                                 <span className="text-gray-400 ml-1">
-                                                    ({formatCurrency(zone.delivery_cost)})
+                                                    ({formatCurrency(Math.round(zone.delivery_cost * (businessInfo.deliverySurgeMultiplier || 1)))})
                                                 </span>
                                             </span>
                                         </div>

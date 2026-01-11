@@ -24,6 +24,7 @@ export interface Businessman {
     closing_hours?: string;
     operating_schedule?: ScheduleItem[];
     payment_methods?: PaymentMethod[];
+    delivery_surge_multiplier?: number;
     created_at: string;
     updated_at: string;
     zones?: RestaurantZone[];
@@ -58,9 +59,12 @@ export interface ScheduleItem {
 }
 
 export interface PaymentMethod {
-    type: 'nequi' | 'daviplata' | 'bancolombia' | 'efectivo' | 'otros';
+    id?: string;
+    businessman_id?: string;
+    type: 'nequi' | 'daviplata' | 'bancolombia' | 'efectivo' | 'otros' | string;
     name: string;
-    number?: string;
+    account_number?: string; // DB column name
+    number?: string; // Legacy support (frontend uses this)
     instructions?: string;
     is_active: boolean;
 }
@@ -142,6 +146,7 @@ export interface Order {
     subtotal: number;
     shipping_cost: number;
     discount: number;
+    tip: number;
     total: number;
     status: 'pendiente' | 'confirmado' | 'preparando' | 'en_camino' | 'entregado' | 'cancelado';
     notification_sent: boolean;
@@ -224,6 +229,7 @@ export interface CreateOrderPayload {
     subtotal: number;
     shipping_cost: number;
     discount: number;
+    tip: number;
     total: number;
     items: {
         product_id: string;

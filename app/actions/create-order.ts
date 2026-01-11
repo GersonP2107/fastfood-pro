@@ -30,6 +30,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<ApiRespo
                 subtotal: payload.subtotal,
                 shipping_cost: payload.shipping_cost,
                 discount: payload.discount,
+                tip: payload.tip,
                 total: payload.total,
                 status: 'pending',
                 notification_sent: false

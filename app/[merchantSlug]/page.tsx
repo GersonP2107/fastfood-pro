@@ -7,6 +7,9 @@ interface PageProps {
     params: Promise<{ merchantSlug: string }>;
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function MerchantPage(props: PageProps) {
     const params = await props.params;
     const supabase = await createClient();
@@ -31,6 +34,21 @@ export default async function MerchantPage(props: PageProps) {
         .eq('businessman_id', businessman.id)
         .eq('is_active', true)
         .order('delivery_cost', { ascending: true });
+
+    // Fetch payment methods from the new table
+    const { data: paymentMethodsData } = await (supabase as any)
+        .from('payment_methods')
+        .select('*')
+        .eq('businessman_id', businessman.id)
+        .eq('is_active', true);
+
+    // Map the new table data to the simplified structure expected by the frontend
+    if (paymentMethodsData && paymentMethodsData.length > 0) {
+        businessman.payment_methods = paymentMethodsData.map((pm: any) => ({
+            ...pm,
+            number: pm.account_number || pm.number // Map account_number to number for frontend compatibility
+        }));
+    }
 
     return <MerchantMenuClient businessman={businessman} deliveryZones={deliveryZones as any[] || []} />;
 }

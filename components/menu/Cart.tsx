@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/lib/cart-store';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, checkBusinessStatus } from '@/lib/utils';
 import Link from 'next/link';
 import { CheckoutSummary } from '@/components/menu/CheckoutSummary';
 import { Businessman, DeliveryZone } from '@/lib/types';
@@ -19,9 +19,14 @@ interface CartProps {
     deliveryZones: DeliveryZone[];
     tableNumber?: string;
     isPOS?: boolean;
+    zoneName?: string;
 }
 
-export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false }: CartProps) {
+import { createOrder } from '@/app/actions/create-order';
+import { POSConfirmationModal } from './POSConfirmationModal';
+import { POSSuccessModal } from './POSSuccessModal';
+
+export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, zoneName }: CartProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [showCustomerForm, setShowCustomerForm] = useState(false);
     const [showCheckoutSummary, setShowCheckoutSummary] = useState(false);
@@ -34,14 +39,90 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false }:
     const [deliveryAddress, setDeliveryAddress] = useState('');
     const [nameError, setNameError] = useState('');
     const [phoneError, setPhoneError] = useState('');
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [termsError, setTermsError] = useState('');
+    const [showPOSConfirm, setShowPOSConfirm] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [isSubmittingPOS, setIsSubmittingPOS] = useState(false);
+    const [shippingCost, setShippingCost] = useState(0);
     const { items, updateQuantity, removeItem, getTotal, getItemCount, clearCart } = useCartStore();
 
     const itemCount = getItemCount();
     const total = getTotal();
 
+    // Check business status
+    const { isOpen: isBusinessOpen, message: businessStatusMessage } = checkBusinessStatus(businessman);
+
     const handleCheckout = (type: 'takeout' | 'delivery' | 'dine_in') => {
         setServiceType(type);
-        setShowCustomerForm(true);
+        if (type === 'dine_in') {
+            if (isPOS && !tableNumber) {
+                // Show error/alert if no table is selected in POS mode
+                alert("⚠️ Por favor selecciona una MESA y ZONA antes de continuar.");
+                return;
+            }
+            // For POS/Table orders, show simplified confirmation
+            setShowPOSConfirm(true);
+        } else {
+            if (type !== 'delivery') {
+                setShippingCost(0);
+            }
+            // Standard flow
+            setShowCustomerForm(true);
+        }
+    };
+
+    const handlePOSSubmit = async () => {
+        if (!tableNumber) {
+            alert('Por favor selecciona una mesa primero.');
+            return;
+        }
+        setIsSubmittingPOS(true);
+
+        try {
+            const result = await createOrder({
+                businessman_id: businessman.id,
+                client_name: `Mesa ${tableNumber}`,
+                client_phone: '0000000000', // Default placeholder for POS
+                delivery_type: 'dine_in',
+                delivery_address: `Zona: ${zoneName || 'General'}, Mesa: ${tableNumber}`,
+                table_number: tableNumber,
+                delivery_notes: 'Pedido realizado desde POS',
+                payment_method: 'Pendiente (POS)', // Or 'Efectivo' default? Pending logic.
+                subtotal: getTotal(),
+                shipping_cost: 0,
+                discount: 0,
+                tip: 0,
+                total: getTotal(),
+                items: items.map(item => ({
+                    product_id: item.product.id,
+                    product_name: item.product.name,
+                    product_description: item.product.description || '',
+                    unit_price: item.product.price,
+                    quantity: item.quantity,
+                    subtotal: item.subtotal,
+                    modifiers: item.modifiers_selected.map(mod => ({
+                        modifier_id: mod.id,
+                        modifier_name: mod.name,
+                        additional_price: mod.additional_price
+                    }))
+                }))
+            });
+
+            if (result.error) {
+                alert('Error al crear el pedido: ' + result.error);
+            } else {
+                // Success: Clear cart and maybe show success message
+                setShowPOSConfirm(false);
+                setShowSuccessModal(true);
+                setIsOpen(false); // Close cart sidebar (optional, but cleaner)
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error de conexión al enviar el pedido.');
+        } finally {
+            setIsSubmittingPOS(false);
+        }
     };
 
     const validateForm = () => {
@@ -66,6 +147,14 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false }:
             setPhoneError('');
         }
 
+        // Validate terms
+        if (!acceptedTerms) {
+            setTermsError('Debes aceptar los términos y la política de datos');
+            isValid = false;
+        } else {
+            setTermsError('');
+        }
+
         return isValid;
     };
 
@@ -83,8 +172,10 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false }:
         }
     };
 
-    const handleAddressConfirm = (address: string) => {
+    const handleAddressConfirm = (address: string, zoneCost: number) => {
         setDeliveryAddress(address);
+        // Cost already includes multiplier from AddressForm
+        setShippingCost(zoneCost);
         setShowAddressForm(false);
         setShowCheckoutSummary(true);
     };
@@ -329,73 +420,101 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false }:
                                                 Selecciona el tipo de servicio:
                                             </p>
 
-                                            <div className={`grid ${tableNumber || isPOS ? 'grid-cols-1' : 'grid-cols-3'} gap-2`}>
-                                                {/* Para comer aquí */}
-                                                <motion.button
-                                                    onClick={() => (!tableNumber && !isPOS) && handleCheckout('dine_in')}
-                                                    whileHover={{ scale: (tableNumber || isPOS) ? 1 : 1.02 }}
-                                                    whileTap={{ scale: (tableNumber || isPOS) ? 1 : 0.98 }}
-                                                    className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-lg font-semibold text-[10px] hover:bg-blue-500 md:text-xs transition-all duration-300 shadow-lg ${serviceType === 'dine_in' || tableNumber || isPOS ? 'bg-black text-white cursor-default' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                                                >
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                                                    </svg>
-                                                    <span>{tableNumber ? `Mesa / Local (${tableNumber})` : 'Mesa / Local'}</span>
-                                                </motion.button>
-
-                                                {(!tableNumber && !isPOS) && (
+                                            <div className={`grid ${tableNumber || isPOS ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
+                                                {isBusinessOpen ? (
                                                     <>
-                                                        {/* Para llevar button */}
-                                                        <motion.button
-                                                            onClick={() => handleCheckout('takeout')}
-                                                            whileHover={{ scale: 1.02 }}
-                                                            whileTap={{ scale: 0.98 }}
-                                                            className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-blue-500 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
-                                                        >
-                                                            <ShoppingBag className="w-4 h-4" />
-                                                            <span>Para llevar</span>
-                                                        </motion.button>
-
-                                                        {/* A domicilio button */}
-                                                        <motion.button
-                                                            onClick={() => handleCheckout('delivery')}
-                                                            whileHover={{ scale: 1.02 }}
-                                                            whileTap={{ scale: 0.98 }}
-                                                            className="flex flex-col items-center justify-center gap-1.5 bg-black hover:bg-blue-500 text-white py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg"
-                                                        >
-                                                            <svg
-                                                                className="w-4 h-4"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
+                                                        {/* POS Mode: ONLY Show Dine-in */}
+                                                        {(tableNumber || isPOS) ? (
+                                                            <motion.button
+                                                                onClick={() => handleCheckout('dine_in')}
+                                                                whileHover={{ scale: 1 }}
+                                                                whileTap={{ scale: 1 }}
+                                                                className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-lg font-semibold text-[10px] hover:bg-blue-500 md:text-xs transition-all duration-300 shadow-lg bg-black text-white cursor-pointer`}
                                                             >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={2}
-                                                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                                                                />
-                                                            </svg>
-                                                            <span>A domicilio</span>
-                                                        </motion.button>
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                                                </svg>
+                                                                <span>{tableNumber ? `Confirmar Mesa ${tableNumber}` : 'Seleccionar Mesa'}</span>
+                                                            </motion.button>
+                                                        ) : (
+                                                            /* Public/Standard Mode: Show ONLY Takeout & Delivery */
+                                                            <>
+                                                                {/* Para llevar button */}
+                                                                <motion.button
+                                                                    onClick={() => handleCheckout('takeout')}
+                                                                    whileHover={{ scale: 1.02 }}
+                                                                    whileTap={{ scale: 0.98 }}
+                                                                    className={`flex flex-col items-center justify-center bg-black hover:bg-blue-500 text-white gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg ${serviceType === 'takeout' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                                >
+                                                                    <ShoppingBag className="w-4 h-4" />
+                                                                    <span>Para llevar</span>
+                                                                </motion.button>
+
+                                                                {/* A domicilio button */}
+                                                                <motion.button
+                                                                    onClick={() => handleCheckout('delivery')}
+                                                                    whileHover={{ scale: 1.02 }}
+                                                                    whileTap={{ scale: 0.98 }}
+                                                                    className={`flex flex-col items-center justify-center bg-black hover:bg-blue-500 text-white gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg ${serviceType === 'takeout' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                                >
+                                                                    <svg
+                                                                        className="w-4 h-4"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                                                        />
+                                                                    </svg>
+                                                                    <span>A domicilio</span>
+                                                                </motion.button>
+                                                            </>
+                                                        )}
                                                     </>
+                                                ) : (
+                                                    <div className="col-span-full bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                                                        <p className="text-red-600 font-bold mb-1">
+                                                            🚫 {businessStatusMessage}
+                                                        </p>
+                                                        <p className="text-xs text-red-500">
+                                                            No se pueden realizar pedidos en este momento.
+                                                        </p>
+                                                    </div>
                                                 )}
                                             </div>
 
-                                            <p className="text-[10px] text-center text-gray-500 mt-1.5 leading-tight">
-                                                Al hacer clic en un servicio aceptas los{' '}
-                                                <span className="underline">Términos de uso</span> y{' '}
-                                                <span className="underline">Política de privacidad</span>
-                                            </p>
+                                            {isBusinessOpen && (
+                                                <p className="text-[10px] text-center text-gray-500 mt-1.5 leading-tight">
+                                                    Al hacer clic en un servicio aceptas los{' '}
+                                                    <span className="underline">Términos de uso</span> y{' '}
+                                                    <span className="underline">Política de privacidad</span>
+                                                </p>
+                                            )}
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </motion.div>
                     </>
-                )}
-            </AnimatePresence>
+                )
+                }
+            </AnimatePresence >
+            {/* POS Confirmation Modal */}
+            < POSConfirmationModal
+                isOpen={showPOSConfirm}
+                onClose={() => setShowPOSConfirm(false)}
+                onConfirm={handlePOSSubmit}
+                isSubmitting={isSubmittingPOS}
+                zoneName={zoneName}
+                tableNumber={tableNumber}
+                total={total}
+            />
 
+            {/* Customer Information Form Modal */}
             {/* Customer Information Form Modal */}
             <AnimatePresence>
                 {showCustomerForm && (
@@ -498,6 +617,29 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false }:
                                     )}
                                 </div>
 
+                                {/* Terms & Privacy Checkbox */}
+                                <div className="pt-2">
+                                    <label className="flex items-start gap-3 cursor-pointer group">
+                                        <div className="relative flex items-center mt-0.5">
+                                            <input
+                                                type="checkbox"
+                                                checked={acceptedTerms}
+                                                onChange={(e) => {
+                                                    setAcceptedTerms(e.target.checked);
+                                                    if (termsError) setTermsError('');
+                                                }}
+                                                className="peer h-5 w-5 border-2 border-gray-300 rounded focus:ring-2 focus:ring-black focus:border-black transition-all cursor-pointer accent-black"
+                                            />
+                                        </div>
+                                        <div className="text-xs text-gray-600 leading-relaxed">
+                                            Acepto la <span className="font-semibold text-black hover:underline cursor-pointer">Política de Tratamiento de Datos</span> de acuerdo con la Ley 1581 de 2012 y los <span className="font-semibold text-black hover:underline cursor-pointer">Términos y Condiciones</span>. Entiendo que este software es un intermediario tecnológico y la responsabilidad del servicio recae en el comercio.
+                                        </div>
+                                    </label>
+                                    {termsError && (
+                                        <p className="text-xs text-red-500 mt-2 pl-8 font-medium animate-pulse">{termsError}</p>
+                                    )}
+                                </div>
+
                                 {/* Submit Button */}
                                 <motion.button
                                     onClick={handleSubmitCustomerInfo}
@@ -525,6 +667,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false }:
                     setShowCustomerForm(true);
                 }}
                 deliveryZones={deliveryZones}
+                deliverySurgeMultiplier={businessman.delivery_surge_multiplier}
             />
 
             {/* Checkout Summary */}
@@ -540,6 +683,15 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false }:
                 onEditCustomerInfo={() => {
                     setShowCheckoutSummary(false);
                     setShowCustomerForm(true);
+                }}
+                shippingCost={shippingCost}
+            />
+
+            <POSSuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => {
+                    setShowSuccessModal(false);
+                    clearCart(); // Clear cart only after user acknowledges success
                 }}
             />
         </>
