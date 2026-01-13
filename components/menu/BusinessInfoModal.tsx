@@ -33,6 +33,7 @@ interface BusinessInfoModalProps {
         acceptOrders: boolean;
         operatingSchedule: ScheduleItem[];
         deliverySurgeMultiplier?: number;
+        deliveryTime?: string;
     };
     deliveryZones: DeliveryZone[];
 }
@@ -162,7 +163,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                                 </div>
                                 <div>
                                     <p className="font-medium text-gray-900">A domicilio</p>
-                                    <p className="text-sm text-gray-600">Tiempo de entrega a domicilio 30 - 60min.</p>
+                                    <p className="text-sm text-gray-600">Tiempo de entrega a domicilio {businessInfo.deliveryTime}.</p>
                                 </div>
                             </div>
                             <div className="text-green-500">

@@ -26,6 +26,7 @@ interface MerchantMenuClientProps {
         accept_orders: boolean;
         operating_schedule?: ScheduleItem[];
         delivery_surge_multiplier?: number;
+        delivery_time_estimate?: string;
     };
     deliveryZones: DeliveryZone[];
 }
@@ -58,7 +59,8 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
         closingHours: businessman.closing_hours || "21:00",
         acceptOrders: isOpenNow,
         operatingSchedule: businessman.operating_schedule || [],
-        deliverySurgeMultiplier: businessman.delivery_surge_multiplier || 1
+        deliverySurgeMultiplier: businessman.delivery_surge_multiplier || 1,
+        deliveryTime: businessman.delivery_time_estimate || "30 - 45 min",
     };
 
     // Format WhatsApp link
@@ -156,7 +158,7 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                     <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
                         <Clock className="w-4 h-4" />
                         <span className="text-sm font-medium">
-                            Entrega 30 - 60min.
+                            Entrega {businessInfo.deliveryTime}.
                         </span>
                     </div>
 

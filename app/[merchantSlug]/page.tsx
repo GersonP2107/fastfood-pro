@@ -2,6 +2,7 @@ import { MerchantMenuClient } from '@/components/menu/MerchantMenuClient';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Businessman } from '@/lib/types';
+import { Metadata } from 'next';
 
 interface PageProps {
     params: Promise<{ merchantSlug: string }>;
@@ -9,6 +10,21 @@ interface PageProps {
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+    const params = await props.params;
+    const supabase = await createClient();
+
+    const { data: businessman } = await supabase
+        .from('businessmans')
+        .select('business_name')
+        .eq('slug', params.merchantSlug)
+        .single();
+
+    return {
+        title: businessman?.business_name ? `${businessman.business_name} - Menú Digital` : 'FoodFast Pro - Menú Digital',
+    };
+}
 
 export default async function MerchantPage(props: PageProps) {
     const params = await props.params;

@@ -4,10 +4,17 @@
 // FoodFast Pro - Address Form Component
 // ============================================================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronUp, ChevronDown, User, Phone, Lock, Plus } from 'lucide-react';
 import { DeliveryZone } from '@/lib/types';
+import { ChevronLeft, ChevronUp, ChevronDown, User, Phone, Lock, Plus, Trash2, MapPin, Clock } from 'lucide-react';
+
+interface SavedAddress {
+    street: string;
+    number: string;
+    neighborhood: string;
+    references: string;
+}
 
 interface AddressFormProps {
     isOpen: boolean;
@@ -33,12 +40,25 @@ export function AddressForm({
     const [showCustomerData, setShowCustomerData] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState<string>('');
     const [showAddressForm, setShowAddressForm] = useState(false);
+    const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
 
     // New address form fields
     const [street, setStreet] = useState('');
     const [number, setNumber] = useState('');
     const [neighborhood, setNeighborhood] = useState('');
     const [references, setReferences] = useState('');
+
+    // Load saved addresses
+    useEffect(() => {
+        const saved = localStorage.getItem('foodfast_saved_addresses');
+        if (saved) {
+            try {
+                setSavedAddresses(JSON.parse(saved));
+            } catch (e) {
+                console.error('Error loading saved addresses', e);
+            }
+        }
+    }, []);
 
     const handleConfirm = () => {
         // Find zone cost
@@ -55,6 +75,21 @@ export function AddressForm({
         if (street && number && neighborhood) {
             const fullAddress = `${street} ${number}, ${neighborhood}${references ? `, ${references}` : ''}`;
             onConfirm(fullAddress, zoneCost);
+
+            // Save to Saved Addresses List
+            const newAddress: SavedAddress = { street, number, neighborhood, references };
+
+            // Filter out exact duplicates and limit to 5
+            const updatedList = [
+                newAddress,
+                ...savedAddresses.filter(a =>
+                    `${a.street} ${a.number} ${a.neighborhood}` !== `${street} ${number} ${neighborhood}`
+                )
+            ].slice(0, 5);
+
+            setSavedAddresses(updatedList);
+            localStorage.setItem('foodfast_saved_addresses', JSON.stringify(updatedList));
+
         } else if (selectedAddress) {
             onConfirm(selectedAddress, 0);
         }
@@ -172,7 +207,7 @@ export function AddressForm({
                                                     type="text"
                                                     value={street}
                                                     onChange={(e) => setStreet(e.target.value)}
-                                                    placeholder="Escribe aquí"
+                                                    placeholder="Carrera 18G"
                                                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm"
                                                 />
                                             </div>
@@ -186,7 +221,7 @@ export function AddressForm({
                                                     type="text"
                                                     value={number}
                                                     onChange={(e) => setNumber(e.target.value)}
-                                                    placeholder="Escribe aquí"
+                                                    placeholder="# 7D-34"
                                                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm"
                                                 />
                                             </div>
@@ -224,8 +259,38 @@ export function AddressForm({
                                     )}
                                 </AnimatePresence>
 
-                                {/* Saved Addresses List (if any) */}
-                                {/* You can add saved addresses here later */}
+                                {/* Saved Addresses List */}
+                                {savedAddresses.length > 0 && !showAddressForm && (
+                                    <div className="space-y-3 mt-4">
+                                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Direcciones guardadas</p>
+                                        {savedAddresses.map((addr, index) => (
+                                            <div
+                                                key={index}
+                                                onClick={() => {
+                                                    setStreet(addr.street);
+                                                    setNumber(addr.number);
+                                                    setNeighborhood(addr.neighborhood);
+                                                    setReferences(addr.references);
+                                                    setShowAddressForm(true);
+                                                }}
+                                                className="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 p-3 rounded-xl cursor-pointer transition-all group"
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="p-2 bg-white rounded-lg shadow-sm group-hover:bg-blue-100 transition-colors">
+                                                        <MapPin className="w-5 h-5 text-gray-400 group-hover:text-blue-500" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="font-semibold text-gray-900 text-sm">{addr.street} {addr.number}</p>
+                                                        <p className="text-xs text-gray-500">{addr.neighborhood}</p>
+                                                        {addr.references && (
+                                                            <p className="text-[10px] text-gray-400 mt-1 italic line-clamp-1">{addr.references}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
 

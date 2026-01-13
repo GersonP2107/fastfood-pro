@@ -4,7 +4,7 @@
 // FoodFast Pro - Cart Component with Animations
 // ============================================================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/lib/cart-store';
@@ -49,6 +49,20 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
 
     const itemCount = getItemCount();
     const total = getTotal();
+
+    // Load saved customer info
+    useEffect(() => {
+        const savedData = localStorage.getItem('foodfast_user_data');
+        if (savedData) {
+            try {
+                const { name, phone } = JSON.parse(savedData);
+                if (name) setCustomerName(name);
+                if (phone) setCustomerPhone(phone);
+            } catch (e) {
+                console.error('Error loading saved user data', e);
+            }
+        }
+    }, []);
 
     // Check business status
     const { isOpen: isBusinessOpen, message: businessStatusMessage } = checkBusinessStatus(businessman);
@@ -162,6 +176,12 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
         if (validateForm()) {
             setShowCustomerForm(false);
             setIsOpen(false);
+
+            // Save to localStorage
+            localStorage.setItem('foodfast_user_data', JSON.stringify({
+                name: customerName,
+                phone: customerPhone
+            }));
 
             // If delivery, show address form first
             if (serviceType === 'delivery') {
@@ -444,7 +464,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                                     onClick={() => handleCheckout('takeout')}
                                                                     whileHover={{ scale: 1.02 }}
                                                                     whileTap={{ scale: 0.98 }}
-                                                                    className={`flex flex-col items-center justify-center bg-black hover:bg-blue-500 text-white gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg ${serviceType === 'takeout' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                                    className={`flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg ${serviceType === 'takeout' ? 'bg-black text-white hover:bg-zinc-800' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                                                                 >
                                                                     <ShoppingBag className="w-4 h-4" />
                                                                     <span>Para llevar</span>
@@ -455,7 +475,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                                     onClick={() => handleCheckout('delivery')}
                                                                     whileHover={{ scale: 1.02 }}
                                                                     whileTap={{ scale: 0.98 }}
-                                                                    className={`flex flex-col items-center justify-center bg-black hover:bg-blue-500 text-white gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg ${serviceType === 'takeout' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                                    className={`flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg ${serviceType === 'delivery' ? 'bg-black text-white hover:bg-zinc-800' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                                                                 >
                                                                     <svg
                                                                         className="w-4 h-4"

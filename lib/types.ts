@@ -25,6 +25,7 @@ export interface Businessman {
     operating_schedule?: ScheduleItem[];
     payment_methods?: PaymentMethod[];
     delivery_surge_multiplier?: number;
+    delivery_time_estimate?: string;
     created_at: string;
     updated_at: string;
     zones?: RestaurantZone[];
