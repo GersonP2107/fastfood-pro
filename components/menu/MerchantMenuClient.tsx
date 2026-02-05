@@ -20,6 +20,8 @@ interface MerchantMenuClientProps {
         logo_url?: string;
         phone?: string;
         whatsapp_number: string;
+        department?: string;
+        city?: string;
         address?: string;
         opening_hours?: string;
         closing_hours?: string;
@@ -51,16 +53,18 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
     const businessInfo = {
         name: businessman.business_name || "Mi Negocio",
         description: businessman.description || "Deliciosa comida preparada con amor",
-        logo: businessman.logo_url || "https://d2nagnwby8accc.cloudfront.net/companies/logos/390bd37b-e06e-4f35-aadc-051b1db18bbf.webp",
-        phone: businessman.phone || "316 638 5652",
-        whatsapp: businessman.whatsapp_number || "573166385652",
-        address: businessman.address || "Cali, Colombia",
+        logo: businessman.logo_url || "https://placehold.net/main.svg",
+        phone: businessman.phone || "",
+        whatsapp: businessman.whatsapp_number || "",
+        department: businessman.department || "",
+        city: businessman.city || "",
+        address: businessman.address || "",
         openingHours: businessman.opening_hours || "09:00",
         closingHours: businessman.closing_hours || "21:00",
         acceptOrders: isOpenNow,
         operatingSchedule: businessman.operating_schedule || [],
         deliverySurgeMultiplier: businessman.delivery_surge_multiplier || 1,
-        deliveryTime: businessman.delivery_time_estimate || "30 - 45 min",
+        deliveryTime: businessman.delivery_time_estimate || "",
     };
 
     // Format WhatsApp link
@@ -71,7 +75,7 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
             {/* Modern Header with Banner */}
             <header className="bg-white shadow-md rounded-2xl relative">{/* Removed sticky positioning */}
                 {/* Banner Image with Logo */}
-                <div className="relative h-32 md:h-40 bg-gradient-to-r from-orange-400 via-amber-300 to-orange-400 overflow-hidden ">
+                <div className="relative h-32 md:h-40 bg-linear-to-r from-orange-400 via-amber-300 to-orange-400 overflow-hidden ">
                     {/* Decorative Pattern */}
                     <div className="absolute inset-0 opacity-20">
                         <div className="absolute inset-0" style={{
@@ -149,9 +153,16 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                     </h1>
 
                     {/* Address */}
-                    <div className="flex items-center justify-center gap-2 text-gray-600 mb-2">
-                        <MapPin className="w-4 h-4" />
-                        <span className="text-sm">{businessInfo.address}</span>
+                    <div className="flex flex-col items-center text-gray-600 mb-2">
+                        <div className="flex items-center gap-2 justify-center">
+                            <MapPin className="w-4 h-4" />
+                            <span className="text-sm">{businessInfo.address}</span>
+                        </div>
+                        {(businessInfo.city || businessInfo.department) && (
+                            <span className="text-xs text-gray-500">
+                                {[businessInfo.city, businessInfo.department].filter(Boolean).join(', ')}
+                            </span>
+                        )}
                     </div>
 
                     {/* Delivery Time */}
@@ -174,7 +185,7 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
             </div>
 
             {/* Main Content */}
-            < main className="container mx-auto px-4 py-8 flex-grow" >
+            < main className="container mx-auto px-4 py-8 grow" >
                 <MenuDisplay businessmanId={businessman.id} />
             </main >
 

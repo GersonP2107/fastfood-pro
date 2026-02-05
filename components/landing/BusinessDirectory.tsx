@@ -80,7 +80,7 @@ export function BusinessDirectory({ businesses, deliveryZones }: BusinessDirecto
                         className="group block bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100 hover:border-orange-200"
                     >
                         {/* Logo/Image */}
-                        <div className="relative h-48 bg-gradient-to-br from-orange-100 to-amber-50 overflow-hidden">
+                        <div className="relative h-48 bg-linear-to-br from-orange-100 to-amber-50 overflow-hidden">
                             {biz.logo_url ? (
                                 <img
                                     src={biz.logo_url}
@@ -139,7 +139,7 @@ export function BusinessDirectory({ businesses, deliveryZones }: BusinessDirecto
                                 {/* City */}
                                 {biz.city && (
                                     <div className="flex items-center gap-2">
-                                        <MapPin className="w-4 h-4 flex-shrink-0" />
+                                        <MapPin className="w-4 h-4 shrink-0" />
                                         <span className="truncate">{biz.city}</span>
                                     </div>
                                 )}
@@ -147,7 +147,7 @@ export function BusinessDirectory({ businesses, deliveryZones }: BusinessDirecto
                                 {/* Hours */}
                                 {biz.opening_hours && biz.closing_hours && (
                                     <div className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4 flex-shrink-0" />
+                                        <Clock className="w-4 h-4 shrink-0" />
                                         <span>
                                             {biz.opening_hours} - {biz.closing_hours}
                                         </span>
@@ -157,7 +157,7 @@ export function BusinessDirectory({ businesses, deliveryZones }: BusinessDirecto
                                 {/* Phone */}
                                 {biz.phone && (
                                     <div className="flex items-center gap-2">
-                                        <Phone className="w-4 h-4 flex-shrink-0" />
+                                        <Phone className="w-4 h-4 shrink-0" />
                                         <span>{biz.phone}</span>
                                     </div>
                                 )}

@@ -272,7 +272,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                             className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
                         >
                             {/* Header */}
-                            <div className="bg-gradient-to-r from-primary to-primary/80 text-black p-6 flex items-center justify-between">
+                            <div className="bg-linear-to-r from-primary to-primary/80 text-black p-6 flex items-center justify-between">
                                 <motion.div
                                     initial={{ x: -20, opacity: 0 }}
                                     animate={{ x: 0, opacity: 1 }}
@@ -464,7 +464,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                                     onClick={() => handleCheckout('takeout')}
                                                                     whileHover={{ scale: 1.02 }}
                                                                     whileTap={{ scale: 0.98 }}
-                                                                    className={`flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg ${serviceType === 'takeout' ? 'bg-black text-white hover:bg-zinc-800' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                                    className="flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg bg-black text-white hover:bg-blue-500"
                                                                 >
                                                                     <ShoppingBag className="w-4 h-4" />
                                                                     <span>Para llevar</span>
@@ -475,7 +475,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                                     onClick={() => handleCheckout('delivery')}
                                                                     whileHover={{ scale: 1.02 }}
                                                                     whileTap={{ scale: 0.98 }}
-                                                                    className={`flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg ${serviceType === 'delivery' ? 'bg-black text-white hover:bg-zinc-800' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                                    className="flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg bg-black text-white hover:bg-blue-500"
                                                                 >
                                                                     <svg
                                                                         className="w-4 h-4"
@@ -643,13 +643,43 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                         <div className="relative flex items-center mt-0.5">
                                             <input
                                                 type="checkbox"
+                                                className="sr-only"
                                                 checked={acceptedTerms}
                                                 onChange={(e) => {
                                                     setAcceptedTerms(e.target.checked);
                                                     if (termsError) setTermsError('');
                                                 }}
-                                                className="peer h-5 w-5 border-2 border-gray-300 rounded focus:ring-2 focus:ring-black focus:border-black transition-all cursor-pointer accent-black"
                                             />
+                                            <motion.div
+                                                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${acceptedTerms ? 'bg-black border-black' : 'bg-white border-gray-300 group-hover:border-gray-400'
+                                                    }`}
+                                                whileTap={{ scale: 0.9 }}
+                                                transition={{ duration: 0.2 }}
+                                            >
+                                                <AnimatePresence>
+                                                    {acceptedTerms && (
+                                                        <motion.svg
+                                                            initial={{ opacity: 0, scale: 0.5 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            exit={{ opacity: 0, scale: 0.5 }}
+                                                            className="w-3.5 h-3.5 text-white"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                            strokeWidth={3}
+                                                        >
+                                                            <motion.path
+                                                                d="M5 13l4 4L19 7"
+                                                                initial={{ pathLength: 0 }}
+                                                                animate={{ pathLength: 1 }}
+                                                                transition={{ duration: 0.2 }}
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                            />
+                                                        </motion.svg>
+                                                    )}
+                                                </AnimatePresence>
+                                            </motion.div>
                                         </div>
                                         <div className="text-xs text-gray-600 leading-relaxed">
                                             Acepto la <span className="font-semibold text-black hover:underline cursor-pointer">Política de Tratamiento de Datos</span> de acuerdo con la Ley 1581 de 2012 y los <span className="font-semibold text-black hover:underline cursor-pointer">Términos y Condiciones</span>. Entiendo que este software es un intermediario tecnológico y la responsabilidad del servicio recae en el comercio.

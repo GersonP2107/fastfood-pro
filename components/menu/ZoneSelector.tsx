@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RestaurantZone, RestaurantTable } from '@/lib/types';
 import { ChevronRight, Users } from 'lucide-react';
@@ -9,10 +9,28 @@ interface ZoneSelectorProps {
     zones: RestaurantZone[];
     onTableSelect: (tableName: string, zoneName: string) => void;
     selectedTable?: string;
+    selectedZoneName?: string;
 }
 
-export function ZoneSelector({ zones, onTableSelect, selectedTable }: ZoneSelectorProps) {
-    const [selectedZoneId, setSelectedZoneId] = useState<string | null>(zones.length > 0 ? zones[0].id : null);
+export function ZoneSelector({ zones, onTableSelect, selectedTable, selectedZoneName }: ZoneSelectorProps) {
+    // Find initial zone ID based on name or default to first zone
+    const getInitialZoneId = () => {
+        if (selectedZoneName) {
+            const found = zones.find(z => z.name === selectedZoneName);
+            if (found) return found.id;
+        }
+        return zones.length > 0 ? zones[0].id : null;
+    };
+
+    const [selectedZoneId, setSelectedZoneId] = useState<string | null>(getInitialZoneId());
+
+    // Sync with prop changes
+    useEffect(() => {
+        if (selectedZoneName) {
+            const found = zones.find(z => z.name === selectedZoneName);
+            if (found) setSelectedZoneId(found.id);
+        }
+    }, [selectedZoneName, zones]);
 
     const activeZone = zones.find(z => z.id === selectedZoneId);
 
@@ -28,7 +46,7 @@ export function ZoneSelector({ zones, onTableSelect, selectedTable }: ZoneSelect
                     <button
                         key={zone.id}
                         onClick={() => setSelectedZoneId(zone.id)}
-                        className={`flex-shrink-0 px-4 py-3 text-sm font-medium transition-colors relative ${selectedZoneId === zone.id
+                        className={`shrink-0 px-4 py-3 text-sm font-medium transition-colors relative ${selectedZoneId === zone.id
                             ? 'text-blue-600'
                             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                             }`}

@@ -30,9 +30,9 @@ export default async function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-orange-50 to-white">
       {/* Hero Section */}
-      <header className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white py-16 px-4">
+      <header className="bg-linear-to-r from-orange-500 via-amber-500 to-orange-500 text-white py-16 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
             FoodFast Pro

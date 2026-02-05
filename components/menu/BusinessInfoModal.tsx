@@ -28,6 +28,8 @@ interface BusinessInfoModalProps {
         phone: string;
         whatsapp: string;
         address: string;
+        city?: string;
+        department?: string;
         openingHours: string;
         closingHours: string;
         acceptOrders: boolean;
@@ -100,7 +102,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
 
                     {/* Business Name and Logo */}
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shadow-md flex-shrink-0">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shadow-md shrink-0">
                             <img
                                 src={businessInfo.logo}
                                 alt={businessInfo.name}
@@ -144,8 +146,15 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                     <div className="border-t border-gray-200 pt-6">
                         <h4 className="font-semibold text-gray-900 mb-3">Dirección</h4>
                         <div className="flex items-start gap-3 text-gray-700">
-                            <MapPin className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                            <p>{businessInfo.address}</p>
+                            <MapPin className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                            <div>
+                                <p>{businessInfo.address}</p>
+                                {(businessInfo.city || businessInfo.department) && (
+                                    <p className="text-gray-500 text-sm mt-0.5">
+                                        {[businessInfo.city, businessInfo.department].filter(Boolean).join(', ')}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -204,7 +213,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                                 {deliveryZones.length > 0 ? (
                                     deliveryZones.map((zone) => (
                                         <div key={zone.id} className="flex items-center gap-1">
-                                            <span className="w-1 h-1 bg-green-500 rounded-full flex-shrink-0"></span>
+                                            <span className="w-1 h-1 bg-green-500 rounded-full shrink-0"></span>
                                             <span className="text-gray-700">
                                                 {zone.zone_name}
                                                 <span className="text-gray-400 ml-1">

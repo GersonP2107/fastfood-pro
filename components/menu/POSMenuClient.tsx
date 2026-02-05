@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Businessman, Category, Product, DeliveryZone, RestaurantZone, RestaurantTable, Order } from '@/lib/types';
 import { Cart } from './Cart';
 import { MenuDisplay } from './MenuDisplay';
@@ -21,8 +22,11 @@ export function POSMenuClient({
     deliveryZones
 }: POSMenuClientProps) {
     const { items, clearCart } = useCartStore();
-    const [selectedTable, setSelectedTable] = useState<string>('');
-    const [selectedZone, setSelectedZone] = useState<string>('');
+    const searchParams = useSearchParams();
+
+    // Initialize state from URL params if available
+    const [selectedTable, setSelectedTable] = useState<string>(searchParams.get('table') || '');
+    const [selectedZone, setSelectedZone] = useState<string>(searchParams.get('zone') || '');
 
     // Clear cart if it contains items from a different merchant or context
     // Ideally we might want to persist POS cart differently, but for now reuse store
@@ -31,6 +35,14 @@ export function POSMenuClient({
             // Optional check logic
         }
     }, []);
+
+    // Update state if URL params change (e.g. navigation)
+    useEffect(() => {
+        const tableParam = searchParams.get('table');
+        const zoneParam = searchParams.get('zone');
+        if (tableParam) setSelectedTable(tableParam);
+        if (zoneParam) setSelectedZone(zoneParam);
+    }, [searchParams]);
 
     const handleTableSelect = (tableNumber: string, zoneName: string) => {
         setSelectedTable(tableNumber);
@@ -42,8 +54,12 @@ export function POSMenuClient({
             {/* Header */}
             <header className="bg-white sticky top-0 z-40 border-b border-gray-200 shadow-sm px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                        POS
+                    <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                        <img
+                            src={businessman.logo_url || "https://placehold.net/main.svg"}
+                            alt={businessman.business_name}
+                            className="w-full h-full object-cover"
+                        />
                     </div>
                     <div>
                         <h1 className="text-lg font-bold leading-none">{businessman.business_name}</h1>
@@ -57,21 +73,18 @@ export function POSMenuClient({
                 )}
             </header>
 
-            <main className="flex-grow container mx-auto px-4 py-6 max-w-5xl">
+            <main className="grow container mx-auto px-4 py-6 max-w-5xl">
                 {/* Zone & Table Selector */}
                 {businessman.zones && businessman.zones.length > 0 ? (
                     <ZoneSelector
                         zones={businessman.zones}
                         onTableSelect={handleTableSelect}
                         selectedTable={selectedTable}
+                        selectedZoneName={selectedZone}
                     />
                 ) : (
                     <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 mb-6 text-yellow-800 text-sm">
                         ⚠️ No hay zonas ni mesas configuradas para este negocio.
-                        <br />
-                        <span className="text-xs text-yellow-600 mt-1 block">
-                            (Se requiere configuración en base de datos: restaurant_zones y tables)
-                        </span>
                     </div>
                 )}
 

@@ -36,7 +36,7 @@ export function CategoryFilter({
                             if (showSearch) setSearchQuery('');
                         }}
                         className={`p-2 rounded-lg transition-colors ${showSearch
-                            ? 'bg-gray-900 text-white'
+                            ? 'bg-gray-900 text-black'
                             : 'hover:bg-gray-100 text-gray-600'
                             }`}
                     >
@@ -51,7 +51,7 @@ export function CategoryFilter({
                     <button
                         onClick={() => setShowMenu(!showMenu)}
                         className={`p-2 rounded-lg transition-colors ${showMenu
-                            ? 'bg-gray-900 text-white'
+                            ? 'bg-gray-900 text-black'
                             : 'hover:bg-gray-100 text-gray-600'
                             }`}
                     >
@@ -66,11 +66,11 @@ export function CategoryFilter({
                                 onClick={() => onSelectCategory(undefined)}
                                 whileTap={{ scale: 0.95 }}
                                 className={`relative px-4 py-2 font-semibold whitespace-nowrap transition-colors ${!selectedCategoryId
-                                    ? 'text-gray-900'
+                                    ? 'text-black'
                                     : 'text-gray-500 hover:text-gray-700'
                                     }`}
                             >
-                                PROMO DICIEMBRE
+                                TODOS
                                 {!selectedCategoryId && (
                                     <motion.div
                                         layoutId="activeTab"
@@ -146,11 +146,11 @@ export function CategoryFilter({
                                         setShowMenu(false);
                                     }}
                                     className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${!selectedCategoryId
-                                            ? 'bg-gray-900 text-white'
-                                            : 'hover:bg-gray-100 text-gray-700'
+                                        ? 'bg-gray-900 text-white'
+                                        : 'hover:bg-gray-100 text-gray-700'
                                         }`}
                                 >
-                                    PROMO DICIEMBRE
+                                    TODOS
                                 </button>
                                 {categorias.map((categoria) => (
                                     <button
@@ -160,8 +160,8 @@ export function CategoryFilter({
                                             setShowMenu(false);
                                         }}
                                         className={`w-full text-left px-4 py-2 rounded-lg transition-colors uppercase text-sm ${selectedCategoryId === categoria.id
-                                                ? 'bg-gray-900 text-white'
-                                                : 'hover:bg-gray-100 text-gray-700'
+                                            ? 'bg-gray-900 text-white'
+                                            : 'hover:bg-gray-100 text-gray-700'
                                             }`}
                                     >
                                         {categoria.name}

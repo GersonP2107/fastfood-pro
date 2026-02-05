@@ -72,13 +72,13 @@ export function ProductCard({ product }: ProductCardProps) {
                         {/* Badges */}
                         <div className="flex flex-wrap gap-2 mb-2">
                             {product.featured && (
-                                <span className="inline-flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                <span className="inline-flex items-center gap-1 bg-linear-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                                     <Sparkles className="w-3 h-3" />
                                     Destacado
                                 </span>
                             )}
                             {tieneDescuento && (
-                                <span className="inline-flex items-center bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                <span className="inline-flex items-center bg-linear-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                                     ¡Oferta!
                                 </span>
                             )}
@@ -118,7 +118,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 </div>
 
                 {/* Right Side - Product Image */}
-                <div className="relative w-40 sm:w-40 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200">
+                <div className="relative w-40 sm:w-40 shrink-0 bg-linear-to-br from-gray-100 to-gray-200">
                     <Image
                         src={getImageUrl(product.image_url)}
                         alt={product.name}
@@ -127,8 +127,8 @@ export function ProductCard({ product }: ProductCardProps) {
                         sizes="(max-width: 640px) 128px, 160px"
                     />
 
-                    {/* Overlay gradient for better image blend */}
-                    <div className="absolute inset-0 bg-gradient-to-l from-transparent to-white/10" />
+                    {/* Overlay linear for better image blend */}
+                    <div className="absolute inset-0 bg-linear-to-l from-transparent to-white/10" />
 
                     {/* Add Button - Positioned over image with animations */}
                     <div className="absolute bottom-2 right-2 z-10">
