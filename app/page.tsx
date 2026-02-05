@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { Businessman } from '@/lib/types';
 import { BusinessDirectory } from '@/components/landing/BusinessDirectory';
+import { HeroSection } from '@/components/landing/HeroSection';
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -30,24 +31,12 @@ export default async function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-orange-50 to-white">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Hero Section */}
-      <header className="bg-linear-to-r from-orange-500 via-amber-500 to-orange-500 text-white py-16 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
-            FoodFast Pro
-          </h1>
-          <p className="text-xl md:text-2xl text-orange-50 mb-2">
-            Los mejores restaurantes en un solo lugar
-          </p>
-          <p className="text-orange-100">
-            Encuentra tu comida favorita y ordena con facilidad
-          </p>
-        </div>
-      </header>
+      <HeroSection />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-12">
+      <main className="max-w-7xl mx-auto px-4 py-12 grow w-full">
         <BusinessDirectory
           businesses={businesses || []}
           deliveryZones={deliveryZonesMap}
@@ -55,7 +44,7 @@ export default async function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-20 fixed bottom-0">
+      <footer className="bg-white border-t border-gray-200 mt-auto w-full">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center text-sm text-gray-500">
             <p className="mb-2">

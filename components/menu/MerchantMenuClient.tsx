@@ -18,6 +18,7 @@ interface MerchantMenuClientProps {
         business_name: string;
         description?: string;
         logo_url?: string;
+        banner_url?: string;
         phone?: string;
         whatsapp_number: string;
         department?: string;
@@ -54,6 +55,7 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
         name: businessman.business_name || "Mi Negocio",
         description: businessman.description || "Deliciosa comida preparada con amor",
         logo: businessman.logo_url || "https://placehold.net/main.svg",
+        banner: businessman.banner_url || null,
         phone: businessman.phone || "",
         whatsapp: businessman.whatsapp_number || "",
         department: businessman.department || "",
@@ -75,19 +77,31 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
             {/* Modern Header with Banner */}
             <header className="bg-white shadow-md rounded-2xl relative">{/* Removed sticky positioning */}
                 {/* Banner Image with Logo */}
-                <div className="relative h-32 md:h-40 bg-linear-to-r from-orange-400 via-amber-300 to-orange-400 overflow-hidden ">
-                    {/* Decorative Pattern */}
-                    <div className="absolute inset-0 opacity-20">
-                        <div className="absolute inset-0" style={{
-                            backgroundImage: `repeating-linear-gradient(
-                                45deg,
-                                transparent,
-                                transparent 10px,
-                                rgba(255,255,255,0.1) 10px,
-                                rgba(255,255,255,0.1) 20px
-                            )`
-                        }} />
-                    </div>
+                <div className="relative h-48 md:h-64 bg-gray-100 overflow-hidden">
+                    {businessInfo.banner ? (
+                        <img
+                            src={businessInfo.banner}
+                            alt="Banner"
+                            className="object-cover"
+                        />
+                    ) : (
+                        <div className="absolute inset-0 bg-linear-to-r from-orange-400 via-amber-300 to-orange-400">
+                            {/* Decorative Pattern only for gradient */}
+                            <div className="absolute inset-0 opacity-20" style={{
+                                backgroundImage: `repeating-linear-gradient(
+                                    45deg,
+                                    transparent,
+                                    transparent 10px,
+                                    rgba(255,255,255,0.1) 10px,
+                                    rgba(255,255,255,0.1) 20px
+                                )`
+                            }} />
+                        </div>
+                    )}
+
+                    {/* Dark Overlay for text readability if needed, or just subtle gradient */}
+                    <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/30 to-transparent" />
+
 
                     {/* Status Badge - Top Left */}
                     <div className="absolute top-4 left-4 z-10">
@@ -133,8 +147,8 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
             </header>
 
             {/* Logo - Moved outside overflow-hidden banner, positioned relative to header */}
-            <div className="absolute top-32 md:top-40 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-                <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden bg-black shadow-2xl border-4 border-white">
+            <div className="absolute top-48 md:top-64 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+                <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden bg-black shadow-lg border-4 border-white">
                     <Image
                         src={businessInfo.logo}
                         alt={businessInfo.name}
@@ -148,7 +162,7 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
             <div className="p-5">
                 <div className="container mx-auto max-w-2xl">
                     {/* Business Name */}
-                    <h1 className="text-xl mt-12 md:text-3xl font-bold text-gray-900 text-center mb-3">
+                    <h1 className="text-xl mt-16 md:mt-20 md:text-3xl font-bold text-gray-900 text-center mb-3">
                         {businessInfo.name}
                     </h1>
 

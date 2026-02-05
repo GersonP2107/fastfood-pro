@@ -590,9 +590,9 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                 if (nameError) setNameError('');
                                             }}
                                             placeholder="Ingresa tu nombre completo"
-                                            className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${nameError
-                                                ? 'border-red-500 focus:border-red-500'
-                                                : 'border-gray-200 focus:border-black'
+                                            className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none transition-all ${nameError
+                                                ? 'border-red-500 focus:border-red-500 bg-red-50'
+                                                : 'border-gray-100 shadow-[0_2px_10px_rgb(0,0,0,0.03)] focus:border-transparent focus:ring-2 focus:ring-black/5 bg-gray-50/50 focus:bg-white'
                                                 }`}
                                         />
                                     </div>
