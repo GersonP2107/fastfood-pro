@@ -482,7 +482,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                             <motion.div
                                                 initial={{ opacity: 0, y: 20 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                className="mt-8 mb-4 border-t border-gray-100 pt-6"
+                                                className="mt-8 mb-4 pt-6"
                                             >
                                                 <h3 className="font-extrabold text-gray-900 text-[17px] leading-none mb-1">Comprado habitualmente con:</h3>
                                                 <p className="text-sm text-gray-500 mb-5 font-medium">Llévate algo más</p>

@@ -152,7 +152,7 @@ export function CheckoutSummary({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+                        className="fixed inset-0 bg-gray-50 backdrop-blur-sm z-50"
                         onClick={onClose}
                     />
 
@@ -178,9 +178,9 @@ export function CheckoutSummary({
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 p-4 space-y-4">
+                        <div className="flex-1 p-4 space-y-4 bg-[#f8f9fa]">
                             {/* Address Row */}
-                            <div className="flex items-start py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors" onClick={onEditCustomerInfo}>
+                            <div className="flex items-start bg-white p-4 shadow-sm rounded-[24px] cursor-pointer hover:bg-gray-50 transition-colors" onClick={onEditCustomerInfo}>
                                 <div className="mt-0.5 w-6 h-6 mr-3 text-gray-800">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                                 </div>
@@ -192,7 +192,7 @@ export function CheckoutSummary({
                             </div>
 
                             {/* Service Type Row */}
-                            <div className="flex items-start py-4 border-b border-gray-100">
+                            <div className="flex items-start bg-white p-4 shadow-sm rounded-[24px]">
                                 <div className="mt-0.5 w-6 h-6 mr-3 text-gray-800">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                                 </div>
@@ -205,7 +205,7 @@ export function CheckoutSummary({
                             </div>
 
                             {/* Merchant & Items Details */}
-                            <div className="flex items-start py-4 border-b border-gray-100">
+                            <div className="flex items-start bg-white p-4 shadow-sm rounded-[24px]">
                                 <div className="mt-0.5 w-6 h-6 mr-3 text-gray-800">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                                 </div>
@@ -216,15 +216,15 @@ export function CheckoutSummary({
                             </div>
 
                             {/* Comment */}
-                            <div className="py-4 border-b border-gray-100 flex items-start">
-                                <div className="mt-3 w-6 h-6 mr-3 text-gray-800">
+                            <div className="p-4 bg-white shadow-sm rounded-full flex items-center">
+                                <div className="w-6 h-6 mr-3 flex items-center text-gray-800">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                                 </div>
                                 <textarea
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
                                     placeholder="Agregar notas para la entrega o preparación"
-                                    className="flex-1 p-0 mt-3 border-none bg-transparent focus:outline-none focus:ring-0 resize-none text-sm text-gray-800 placeholder:text-gray-400"
+                                    className="flex-1 border-none bg-transparent focus:outline-none focus:border-[#fa0050] resize-none text-sm text-gray-800 placeholder:text-gray-400"
                                     rows={1}
                                 />
                             </div>
@@ -237,7 +237,7 @@ export function CheckoutSummary({
                                 </div>
                                 <p className="text-sm text-gray-500 mb-4">Puedes agradecer al usuario repartidor con una propina.</p>
 
-                                <div className="flex gap-2 flex-nowrap overflow-x-auto scrollbar-hide py-1">
+                                <div className="flex gap-2 flex-nowrap overflow-x-auto scrollbar-hide py-1 ">
                                     {/* Default Tip Options */}
                                     {[1000, 2000, 3000, 5000].map((value) => (
                                         <button
@@ -245,7 +245,7 @@ export function CheckoutSummary({
                                             onClick={() => {
                                                 setTip(value);
                                             }}
-                                            className={`px-4 py-2 rounded-xl font-bold text-sm transition-colors whitespace-nowrap flex-none ${tip === value
+                                            className={`px-4 py-2 rounded-xl font-bold text-sm bg-white transition-colors focus:bg-[#fa0050] focus:text-white whitespace-nowrap flex-none ${tip === value
                                                 ? 'bg-orange-50/70 text-[#fa0050]'
                                                 : 'bg-[#f8f9fa] text-gray-600 hover:bg-gray-100'
                                                 }`}
@@ -255,7 +255,7 @@ export function CheckoutSummary({
                                     ))}
                                     <button
                                         onClick={() => { setTip(0); }}
-                                        className={`px-4 py-2 rounded-xl font-bold text-sm transition-colors whitespace-nowrap flex-none ${tip === 0
+                                        className={`px-4 py-2 rounded-xl font-bold text-sm transition-colors whitespace-nowrap focus:bg-[#fa0050] focus:text-white bg-white flex-none ${tip === 0
                                             ? 'bg-orange-50/70 text-[#fa0050]'
                                             : 'bg-[#f8f9fa] text-gray-600 hover:bg-gray-100'
                                             }`}
@@ -346,7 +346,7 @@ export function CheckoutSummary({
                         </div>
 
                         {/* Sticky Bottom Real Checkout Bar */}
-                        <div className="sticky bottom-0 bg-white pt-2 pb-6 px-4 shadow-[0_-15px_40px_rgba(0,0,0,0.08)] z-20">
+                        <div className="sticky bottom-0 bg-white pt-4 pb-5 px-4 shadow-[0_-15px_40px_rgba(0,0,0,0.08)] z-20 rounded-t-[32px]">
                             <div className="flex items-center justify-between gap-4">
                                 <div className="flex flex-col">
                                     <span className="text-[24px] sm:text-[26px] font-black tracking-tight leading-none text-[#111827]">
