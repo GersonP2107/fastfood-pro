@@ -11,7 +11,7 @@ export function POSSuccessModal({ isOpen, onClose }: POSSuccessModalProps) {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-70 flex items-center justify-center p-4">
                     <motion.div
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -38,7 +38,7 @@ export function POSSuccessModal({ isOpen, onClose }: POSSuccessModalProps) {
 
                         <button
                             onClick={onClose}
-                            className="w-full py-3.5 bg-black text-white hover:bg-blue-500 rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                            className="w-full py-3.5 bg-black text-white hover:bg-[#fa0050] rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
                         >
                             Aceptar
                         </button>

@@ -101,7 +101,7 @@ export function MenuDisplay({
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] py-12">
-                <Loader2 className="w-12 h-12 animate-spin text-blue-500 mb-4" />
+                <Loader2 className="w-12 h-12 animate-spin text-[#fa0050] mb-4" />
                 <p className="text-gray-600 font-medium">Cargando menú...</p>
             </div>
         );
@@ -117,7 +117,7 @@ export function MenuDisplay({
                 <p className="text-red-500 mb-6">{error}</p>
                 <button
                     onClick={() => window.location.reload()}
-                    className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                    className="px-6 py-3 bg-[#fa0050] text-white rounded-lg hover:bg-[#d4003e] transition-colors font-medium"
                 >
                     Reintentar
                 </button>

@@ -11,7 +11,8 @@ import { useCartStore } from '@/lib/cart-store';
 import { formatCurrency, checkBusinessStatus } from '@/lib/utils';
 import Link from 'next/link';
 import { CheckoutSummary } from '@/components/menu/CheckoutSummary';
-import { Businessman, DeliveryZone } from '@/lib/types';
+import { Businessman, DeliveryZone, Product } from '@/lib/types';
+import { createClient } from '@/lib/supabase/client';
 import { AddressForm } from '@/components/menu/AddressForm';
 
 interface CartProps {
@@ -45,7 +46,8 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [isSubmittingPOS, setIsSubmittingPOS] = useState(false);
     const [shippingCost, setShippingCost] = useState(0);
-    const { items, updateQuantity, removeItem, getTotal, getItemCount, clearCart } = useCartStore();
+    const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
+    const { items, updateQuantity, removeItem, getTotal, getItemCount, clearCart, addItem } = useCartStore();
 
     const itemCount = getItemCount();
     const total = getTotal();
@@ -63,6 +65,59 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
             }
         }
     }, []);
+
+    // Fetch suggested products
+    useEffect(() => {
+        if (isOpen && items.length > 0 && suggestedProducts.length === 0) {
+            const fetchSuggestions = async () => {
+                const supabase = createClient();
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*, category:categories(id, name)')
+                    .eq('businessman_id', businessman.id)
+                    .eq('is_available', true)
+                    .is('deleted_at', null)
+                    .limit(50);
+
+                if (data && !error) {
+                    const cartItemIds = items.map(item => item.product.id);
+                    const availableItems = data.filter(p => !cartItemIds.includes(p.id));
+
+                    // Priority: Drinks/Beverages
+                    const beverages = availableItems.filter(p =>
+                        p.category?.name?.toLowerCase().includes('bebida') ||
+                        p.category?.name?.toLowerCase().includes('adicional') ||
+                        p.name.toLowerCase().includes('limonada') ||
+                        p.name.toLowerCase().includes('gaseosa') ||
+                        p.name.toLowerCase().includes('coca') ||
+                        p.name.toLowerCase().includes('jugo') ||
+                        p.name.toLowerCase().includes('agua') ||
+                        p.name.toLowerCase().includes('postre')
+                    );
+
+                    let finalSuggestions = beverages;
+                    if (finalSuggestions.length < 3) {
+                        const others = availableItems.filter(p => !finalSuggestions.find(b => b.id === p.id));
+                        finalSuggestions = [...finalSuggestions, ...others].slice(0, 5);
+                    } else {
+                        finalSuggestions = finalSuggestions.slice(0, 5);
+                    }
+                    setSuggestedProducts(finalSuggestions);
+                }
+            };
+            fetchSuggestions();
+        }
+    }, [isOpen, items.length, businessman.id, suggestedProducts.length]);
+
+    // Lock body scroll when any modal/drawer is open
+    useEffect(() => {
+        if (isOpen || showCustomerForm || showAddressForm || showCheckoutSummary || showPOSConfirm || showSuccessModal) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen, showCustomerForm, showAddressForm, showCheckoutSummary, showPOSConfirm, showSuccessModal]);
 
     // Check business status
     const { isOpen: isBusinessOpen, message: businessStatusMessage } = checkBusinessStatus(businessman);
@@ -96,6 +151,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
         try {
             const result = await createOrder({
                 businessman_id: businessman.id,
+                source: 'pos', // Mark as POS order for validation
                 client_name: `Mesa ${tableNumber}`,
                 client_phone: '0000000000', // Default placeholder for POS
                 delivery_type: 'dine_in',
@@ -203,46 +259,49 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
 
     return (
         <>
-            {/* Fixed Bottom Cart Bar - Only show when there are items */}
+            {/* Modern Fixed Bottom Cart Bar (Didi Style) */}
             <AnimatePresence>
                 {itemCount > 0 && (
                     <motion.div
-                        initial={{ y: 100 }}
+                        initial={{ y: 150 }}
                         animate={{ y: 0 }}
-                        exit={{ y: 100 }}
+                        exit={{ y: 150 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-2xl"
+                        className="fixed bottom-0 left-0 right-0 z-40 bg-white rounded-t-[32px] pt-4 pb-5 px-5 sm:px-6 shadow-[0_-15px_40px_rgba(0,0,0,0.08)]"
                     >
-                        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-                            {/* Left side - Item count and total */}
+                        <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+                            {/* Left side - Price & count */}
                             <div className="flex flex-col">
                                 <motion.span
-                                    key={itemCount}
-                                    initial={{ scale: 1.2 }}
-                                    animate={{ scale: 1 }}
-                                    className="text-sm text-gray-600"
-                                >
-                                    {itemCount} {itemCount === 1 ? 'producto' : 'productos'}
-                                </motion.span>
-                                <motion.span
                                     key={total}
-                                    initial={{ scale: 1.3, color: '#3b82f6' }}
-                                    animate={{ scale: 1, color: '#000' }}
+                                    initial={{ scale: 1.1, color: '#fa0050' }}
+                                    animate={{ scale: 1, color: '#111827' }}
                                     transition={{ type: "spring", stiffness: 300 }}
-                                    className="text-xl font-bold"
+                                    className="text-[26px] sm:text-[28px] font-black tracking-tight leading-none"
                                 >
                                     {formatCurrency(total)}
                                 </motion.span>
+                                <motion.span
+                                    key={itemCount}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="text-[#fa0050] text-[13px] font-bold mt-1 tracking-tight"
+                                >
+                                    Ver desglose ^
+                                </motion.span>
                             </div>
 
-                            {/* Right side - View cart button */}
+                            {/* Right side - Action Button */}
                             <motion.button
                                 onClick={() => setIsOpen(true)}
                                 whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="flex-1 max-w-md bg-black hover:bg-blue-500 text-white py-3 md:py-4 px-4 md:px-6 rounded-xl font-bold text-sm md:text-base transition-all duration-300 shadow-lg"
+                                whileTap={{ scale: 0.95 }}
+                                className="flex items-center justify-center gap-2 bg-[#fa0050] hover:bg-[#d4003e] active:bg-[#9e002f] text-white py-3.5 px-6 rounded-[20px] font-bold text-lg transition-all"
                             >
-                                Ver mi pedido
+                                <span className="pr-1">Siguiente</span>
+                                <div className="bg-white text-[#fa0050] w-6 h-6 flex items-center justify-center rounded-full text-[13px] font-black">
+                                    {itemCount}
+                                </div>
                             </motion.button>
                         </div>
                     </motion.div>
@@ -259,7 +318,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+                            className="fixed inset-0 bg-gray-50 backdrop-blur-sm z-50"
                             onClick={() => setIsOpen(false)}
                         />
 
@@ -272,28 +331,30 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                             className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
                         >
                             {/* Header */}
-                            <div className="bg-linear-to-r from-primary to-primary/80 text-black p-6 flex items-center justify-between">
-                                <motion.div
-                                    initial={{ x: -20, opacity: 0 }}
-                                    animate={{ x: 0, opacity: 1 }}
-                                    transition={{ delay: 0.2 }}
-                                    className="flex items-center gap-3"
-                                >
-                                    <ShoppingBag className="w-6 h-6" />
-                                    <h3 className="text-xl font-bold">Tu Pedido</h3>
-                                </motion.div>
-                                <motion.button
-                                    onClick={() => setIsOpen(false)}
-                                    whileHover={{ rotate: 90, scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    className="p-2 hover:bg-white/20 rounded-full transition"
-                                >
-                                    <X className="w-6 h-6" />
-                                </motion.button>
-                            </div>
+                            <header className="pt-4 pb-2 px-2 shrink-0 bg-white z-10">
+                                <div className="bg-white p-4 flex items-center justify-between shadow-[0_0_10px_rgba(0,0,0,0.1)] rounded-full mx-[10px]">
+                                    <motion.div
+                                        initial={{ x: -20, opacity: 0 }}
+                                        animate={{ x: 0, opacity: 1 }}
+                                        transition={{ delay: 0.2 }}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <ShoppingBag className="w-5 h-5 text-gray-800" />
+                                        <h4 className="text-xl font-bold ">Tu Pedido</h4>
+                                    </motion.div>
+                                    <motion.button
+                                        onClick={() => setIsOpen(false)}
+                                        whileHover={{ rotate: 90, scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                                    >
+                                        <X className="w-6 h-6 text-gray-500" />
+                                    </motion.button>
+                                </div>
+                            </header>
 
                             {/* Cart Items */}
-                            <div className="flex-1 overflow-y-auto p-6">
+                            <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
                                 {items.length === 0 ? (
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
@@ -326,20 +387,33 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                         transition: { duration: 0.3 }
                                                     }}
                                                     transition={{ delay: index * 0.05 }}
-                                                    className="bg-gray-50 rounded-xl p-3 border border-gray-200"
+                                                    className="bg-white shadow-[0_0_10px_rgba(0,0,0,0.1)] p-5 rounded-[24px]"
                                                 >
                                                     <div className="flex items-start justify-between mb-2">
-                                                        <div className="flex-1">
-                                                            <h3 className="font-semibold text-sm text-gray-800">{item.product.name}</h3>
-                                                            <p className="text-xs text-primary font-semibold mt-0.5">
-                                                                {formatCurrency(item.product.discount_price || item.product.price)}
-                                                            </p>
+                                                        <div className="flex items-center gap-3 flex-1 pr-4">
+                                                            {item.product.image_url ? (
+                                                                <img
+                                                                    src={item.product.image_url}
+                                                                    alt={item.product.name}
+                                                                    className="w-[52px] h-[52px] rounded-[14px] object-cover bg-gray-50 shrink-0"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-[52px] h-[52px] rounded-[14px] bg-gray-50 flex items-center justify-center shrink-0">
+                                                                    <span className="text-xl">🍲</span>
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                <h4 className="font-semibold text-[15px] text-gray-900 leading-snug">{item.product.name}</h4>
+                                                                <p className="text-[14px] text-gray-500 font-semibold mt-0.5">
+                                                                    {formatCurrency(item.product.discount_price || item.product.price)}
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                         <motion.button
                                                             onClick={() => removeItem(item.product.id)}
                                                             whileHover={{ scale: 1.1, rotate: 10 }}
                                                             whileTap={{ scale: 0.9 }}
-                                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
+                                                            className="p-1.5 text-gray-400 hover:text-red-500 rounded-full transition-colors"
                                                         >
                                                             <Trash2 className="w-4 h-4" />
                                                         </motion.button>
@@ -367,22 +441,25 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                     )}
 
                                                     {/* Quantity Controls */}
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-2 bg-white rounded-lg p-0.5 border border-gray-200">
+                                                    <div className="flex items-center justify-between mt-3">
+                                                        <div className="font-bold text-gray-900 text-sm">
+                                                            Sub: {formatCurrency(item.subtotal)}
+                                                        </div>
+                                                        <div className="flex items-center gap-3 bg-[#f8f9fa] rounded-full p-1">
                                                             <motion.button
                                                                 onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                                                                 whileHover={{ scale: 1.1 }}
                                                                 whileTap={{ scale: 0.9 }}
-                                                                className="p-1.5 hover:bg-gray-100 rounded-md transition"
+                                                                className="w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm text-gray-600 hover:text-gray-900 transition-colors"
                                                             >
-                                                                <Minus className="w-3 h-3" />
+                                                                <Minus className="w-3.5 h-3.5" />
                                                             </motion.button>
                                                             <motion.span
                                                                 key={item.quantity}
-                                                                initial={{ scale: 1.5, color: '#3b82f6' }}
-                                                                animate={{ scale: 1, color: '#1f2937' }}
+                                                                initial={{ scale: 1.5, color: '#fa0050' }}
+                                                                animate={{ scale: 1, color: '#111827' }}
                                                                 transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                                                                className="font-semibold text-sm w-6 text-center"
+                                                                className="font-bold text-[15px] w-4 text-center"
                                                             >
                                                                 {item.quantity}
                                                             </motion.span>
@@ -390,23 +467,57 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                                 onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                                                                 whileHover={{ scale: 1.1 }}
                                                                 whileTap={{ scale: 0.9 }}
-                                                                className="p-1.5 hover:bg-gray-100 rounded-md transition"
+                                                                className="w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm text-[#fa0050] transition-colors"
                                                             >
-                                                                <Plus className="w-3 h-3" />
+                                                                <Plus className="w-3.5 h-3.5" />
                                                             </motion.button>
                                                         </div>
-                                                        <motion.span
-                                                            key={item.subtotal}
-                                                            initial={{ scale: 1.2 }}
-                                                            animate={{ scale: 1 }}
-                                                            className="text-sm font-bold text-gray-800"
-                                                        >
-                                                            {formatCurrency(item.subtotal)}
-                                                        </motion.span>
                                                     </div>
                                                 </motion.div>
                                             ))}
                                         </AnimatePresence>
+
+                                        {/* Comprado habitualmente con / Suggested Products */}
+                                        {suggestedProducts.length > 0 && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="mt-8 mb-4 border-t border-gray-100 pt-6"
+                                            >
+                                                <h3 className="font-extrabold text-gray-900 text-[17px] leading-none mb-1">Comprado habitualmente con:</h3>
+                                                <p className="text-sm text-gray-500 mb-5 font-medium">Llévate algo más</p>
+
+                                                {/* Horizontal Scroll Area */}
+                                                <div className="flex overflow-x-auto gap-4 pb-6 pt-2 -mx-4 px-4 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                                                    {suggestedProducts.map((product) => (
+                                                        <div key={product.id} className="min-w-[130px] w-[130px] snap-start flex flex-col group cursor-pointer" onClick={() => addItem(product, [])}>
+                                                            <div className="relative aspect-square mb-2.5 bg-gray-50 rounded-[20px] overflow-hidden transition-all duration-300">
+                                                                {product.image_url ? (
+                                                                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center text-3xl">🥤</div>
+                                                                )}
+                                                                {/* Plus Button - Didi Style */}
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); addItem(product, []); }}
+                                                                    className="absolute bottom-2 right-2 w-[34px] h-[34px] bg-[#fa0050] text-white rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(250,0,80,0.4)] hover:scale-105 active:scale-95 transition-all"
+                                                                >
+                                                                    <Plus className="w-5 h-5 stroke-[2.5]" />
+                                                                </button>
+                                                            </div>
+                                                            <h4 className="font-bold text-[13px] text-gray-800 line-clamp-2 leading-snug flex-1 mb-1">{product.name}</h4>
+                                                            <p className="font-black text-[14px] text-gray-900">{formatCurrency(product.discount_price || product.price)}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <style jsx>{`
+                                                    .hide-scrollbar::-webkit-scrollbar {
+                                                        display: none;
+                                                    }
+                                                `}</style>
+                                            </motion.div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -419,16 +530,16 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                         animate={{ y: 0, opacity: 1 }}
                                         exit={{ y: 100, opacity: 0 }}
                                         transition={{ type: 'spring', damping: 25 }}
-                                        className="border-t border-gray-200 p-4 bg-gray-50 space-y-3 bottom-0"
+                                        className="p-4 bg-white space-y-4 bottom-0 z-10 shadow-[0_-5px_30px_rgba(0,0,0,0.06)] rounded-t-[32px] shrink-0"
                                     >
-                                        <div className="flex items-center justify-between text-lg font-bold">
-                                            <span className="text-gray-700">Total:</span>
+                                        <div className="flex items-center justify-between text-lg font-bold px-1">
+                                            <span className="text-gray-800">Total a pagar:</span>
                                             <motion.span
                                                 key={total}
-                                                initial={{ scale: 1.3, color: '#3b82f6' }}
-                                                animate={{ scale: 1, color: 'currentColor' }}
+                                                initial={{ scale: 1.3, color: '#fa0050' }}
+                                                animate={{ scale: 1, color: '#111827' }}
                                                 transition={{ type: "spring", stiffness: 300 }}
-                                                className="text-primary text-2xl"
+                                                className="text-2xl font-black tracking-tight"
                                             >
                                                 {formatCurrency(total)}
                                             </motion.span>
@@ -445,53 +556,41 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                     <>
                                                         {/* POS Mode: ONLY Show Dine-in */}
                                                         {(tableNumber || isPOS) ? (
-                                                            <motion.button
+                                                            <button
                                                                 onClick={() => handleCheckout('dine_in')}
-                                                                whileHover={{ scale: 1 }}
-                                                                whileTap={{ scale: 1 }}
-                                                                className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-lg font-semibold text-[10px] hover:bg-blue-500 md:text-xs transition-all duration-300 shadow-lg bg-black text-white cursor-pointer`}
+                                                                className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-[20px] font-bold text-[12px] hover:bg-[#d4003e] transition-all duration-300 shadow-[0_4px_15px_rgba(250,0,80,0.3)] bg-[#fa0050] text-white cursor-pointer`}
                                                             >
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                                                                 </svg>
                                                                 <span>{tableNumber ? `Confirmar Mesa ${tableNumber}` : 'Seleccionar Mesa'}</span>
-                                                            </motion.button>
+                                                            </button>
                                                         ) : (
                                                             /* Public/Standard Mode: Show ONLY Takeout & Delivery */
                                                             <>
                                                                 {/* Para llevar button */}
-                                                                <motion.button
+                                                                <button
                                                                     onClick={() => handleCheckout('takeout')}
-                                                                    whileHover={{ scale: 1.02 }}
-                                                                    whileTap={{ scale: 0.98 }}
-                                                                    className="flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg bg-black text-white hover:bg-blue-500"
+                                                                    className="flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-[20px] font-bold text-[13px] transition-all bg-[#fa0050] text-white hover:bg-[#d4003e] shadow-[0_4px_15px_rgba(250,0,80,0.3)] shadow-[#fa0050]/30 border border-transparent"
                                                                 >
-                                                                    <ShoppingBag className="w-4 h-4" />
+                                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
                                                                     <span>Para llevar</span>
-                                                                </motion.button>
+                                                                </button>
 
                                                                 {/* A domicilio button */}
-                                                                <motion.button
+                                                                <button
                                                                     onClick={() => handleCheckout('delivery')}
-                                                                    whileHover={{ scale: 1.02 }}
-                                                                    whileTap={{ scale: 0.98 }}
-                                                                    className="flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-lg font-semibold text-xs transition-all duration-300 shadow-lg bg-black text-white hover:bg-blue-500"
+                                                                    className="flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-[20px] font-bold text-[13px] transition-all bg-[#fa0050] text-white hover:bg-[#d4003e] shadow-[0_4px_15px_rgba(250,0,80,0.3)] shadow-[#fa0050]/30 border border-transparent"
                                                                 >
-                                                                    <svg
-                                                                        className="w-4 h-4"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        viewBox="0 0 24 24"
-                                                                    >
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                                                                        />
+                                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                                                                        <path d="M10 17h4V5H2v12h3" />
+                                                                        <path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5" />
+                                                                        <path d="M14 17h1" />
+                                                                        <circle cx="7.5" cy="17.5" r="2.5" />
+                                                                        <circle cx="17.5" cy="17.5" r="2.5" />
                                                                     </svg>
                                                                     <span>A domicilio</span>
-                                                                </motion.button>
+                                                                </button>
                                                             </>
                                                         )}
                                                     </>
@@ -544,7 +643,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+                            className="fixed inset-0 bg-gray-50 backdrop-blur-sm z-50"
                             onClick={() => setShowCustomerForm(false)}
                         />
 
@@ -554,19 +653,17 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             transition={{ type: 'spring', damping: 25 }}
-                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl z-50 p-6"
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-[24px] shadow-2xl z-50 p-6"
                         >
                             {/* Header */}
-                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
                                 <button
                                     onClick={() => setShowCustomerForm(false)}
-                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                    className="p-1 hover:bg-gray-50 rounded-full transition-colors"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
+                                    <X className="w-6 h-6 text-gray-400" />
                                 </button>
-                                <h2 className="text-lg font-bold text-gray-900">Agrega tu nombre y teléfono</h2>
+                                <h2 className="text-xl font-extrabold text-gray-900">Tus datos personales</h2>
                             </div>
 
                             {/* Form */}
@@ -608,7 +705,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                     </label>
                                     <div className="flex gap-2">
                                         {/* Country Selector */}
-                                        <select className="w-24 px-3 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors">
+                                        <select className="w-24 px-3 py-3 bg-[#f8f9fa] border border-transparent rounded-[16px] focus:outline-none focus:border-[#fa0050] transition-colors font-semibold text-gray-700">
                                             <option value="+57">🇨🇴 +57</option>
                                             <option value="+1">🇺🇸 +1</option>
                                             <option value="+52">🇲🇽 +52</option>
@@ -625,9 +722,9 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                     if (phoneError) setPhoneError('');
                                                 }}
                                                 placeholder="Número de teléfono"
-                                                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors ${phoneError
-                                                    ? 'border-red-500 focus:border-red-500'
-                                                    : 'border-gray-200 focus:border-black'
+                                                className={`w-full px-4 py-3 bg-[#f8f9fa] border rounded-[16px] focus:outline-none transition-colors ${phoneError
+                                                    ? 'border-red-500 focus:border-red-500 text-red-900'
+                                                    : 'border-transparent focus:border-[#fa0050]'
                                                     }`}
                                             />
                                         </div>
@@ -651,7 +748,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                 }}
                                             />
                                             <motion.div
-                                                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${acceptedTerms ? 'bg-black border-black' : 'bg-white border-gray-300 group-hover:border-gray-400'
+                                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${acceptedTerms ? 'bg-[#fa0050] border-[#fa0050]' : 'bg-white border-gray-200 group-hover:border-[#fa0050]'
                                                     }`}
                                                 whileTap={{ scale: 0.9 }}
                                                 transition={{ duration: 0.2 }}
@@ -695,9 +792,9 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                     onClick={handleSubmitCustomerInfo}
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="w-full bg-black hover:bg-blue-500 text-white py-4 rounded-xl font-bold text-base transition-all duration-300 shadow-lg mt-6"
+                                    className="w-full bg-[#fa0050] hover:bg-[#d4003e] text-white py-4 rounded-[20px] font-bold text-base transition-all duration-300 shadow-[0_4px_15px_rgba(250,0,80,0.3)] shadow-[#fa0050]/30 mt-6"
                                 >
-                                    Continuar
+                                    Siguiente
                                 </motion.button>
                             </div>
                         </motion.div>

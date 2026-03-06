@@ -101,7 +101,7 @@ export function BusinessDirectory({ businesses, deliveryZones }: BusinessDirecto
                             className="group bg-white rounded-3xl shadow-xl hover:shadow-[0_2px_30px_rgb(0,0,0,0.05)] transition-all duration-300 overflow-hidden h-full flex flex-col hover:-translate-y-1"
                         >
                             {/* Logo/Image */}
-                            <div className="relative h-56 bg-linear-to-br from-orange-50 to-amber-50 overflow-hidden">
+                            <div className="relative h-56 bg-linear-to-br from-rose-50 to-pink-50 overflow-hidden">
                                 {biz.logo_url ? (
                                     <img
                                         src={biz.logo_url}
@@ -110,7 +110,7 @@ export function BusinessDirectory({ businesses, deliveryZones }: BusinessDirecto
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
-                                        <div className="w-24 h-24 rounded-full bg-white shadow-sm flex items-center justify-center text-orange-500 font-bold text-3xl">
+                                        <div className="w-24 h-24 rounded-full bg-white shadow-sm flex items-center justify-center text-[#fa0050] font-bold text-3xl">
                                             {biz.business_name.substring(0, 2).toUpperCase()}
                                         </div>
                                     </div>
@@ -150,7 +150,7 @@ export function BusinessDirectory({ businesses, deliveryZones }: BusinessDirecto
                             {/* Content */}
                             <div className="p-6 flex-1 flex flex-col">
                                 {/* Business Name */}
-                                <h2 className="text-2xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors mb-3 line-clamp-1">
+                                <h2 className="text-2xl font-bold text-gray-900 group-hover:text-[#fa0050] transition-colors mb-3 line-clamp-1">
                                     {biz.business_name}
                                 </h2>
 

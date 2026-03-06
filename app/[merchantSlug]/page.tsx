@@ -17,12 +17,23 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 
     const { data: businessman } = await supabase
         .from('businessmans')
-        .select('business_name')
+        .select('business_name, logo_url')
         .eq('slug', params.merchantSlug)
         .single();
 
     return {
         title: businessman?.business_name ? `${businessman.business_name} - Menú Digital` : 'FoodFast Pro - Menú Digital',
+        icons: businessman?.logo_url ? {
+            icon: [
+                { url: businessman.logo_url, sizes: 'any' }
+            ],
+            shortcut: [
+                { url: businessman.logo_url }
+            ],
+            apple: [
+                { url: businessman.logo_url }
+            ],
+        } : undefined,
     };
 }
 
@@ -40,6 +51,33 @@ export default async function MerchantPage(props: PageProps) {
 
     if (error || !businessman) {
         notFound();
+    }
+
+    // Subscription Verification
+    // "No permitiendo el uso del menu hasta que ya el pago alla sido renovado"
+    const allowedStatuses = ['active', 'trialing'];
+    if (businessman.subscription_status && !allowedStatuses.includes(businessman.subscription_status)) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+                <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg text-center">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-2xl text-red-600">⚠️</span>
+                    </div>
+                    <h1 className="text-xl font-bold text-gray-900 mb-2">Servicio Suspendido</h1>
+                    <p className="text-gray-500 mb-6">
+                        El servicio de menú digital para <strong>{businessman.business_name}</strong> se encuentra temporalmente suspendido.
+                    </p>
+                    <p className="text-sm text-gray-400">
+                        Si eres el propietario, por favor ingresa a tu panel para regularizar el estado de tu suscripción.
+                    </p>
+                    <div className="mt-6">
+                        <a href="/login" className="text-[#fa0050] hover:text-[#d4003e] font-medium text-sm">
+                            Ir al Panel de Control &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     // Fetch delivery zones for this businessman

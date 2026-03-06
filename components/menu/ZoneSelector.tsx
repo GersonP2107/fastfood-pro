@@ -47,7 +47,7 @@ export function ZoneSelector({ zones, onTableSelect, selectedTable, selectedZone
                         key={zone.id}
                         onClick={() => setSelectedZoneId(zone.id)}
                         className={`shrink-0 px-4 py-3 text-sm font-medium transition-colors relative ${selectedZoneId === zone.id
-                            ? 'text-blue-600'
+                            ? 'text-[#fa0050]'
                             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                             }`}
                     >
@@ -55,7 +55,7 @@ export function ZoneSelector({ zones, onTableSelect, selectedTable, selectedZone
                         {selectedZoneId === zone.id && (
                             <motion.div
                                 layoutId="activeZoneTab"
-                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#fa0050]"
                             />
                         )}
                     </button>
@@ -80,8 +80,8 @@ export function ZoneSelector({ zones, onTableSelect, selectedTable, selectedZone
                                     key={table.id}
                                     onClick={() => activeZone && onTableSelect(table.name, activeZone.name)}
                                     className={`relative flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all duration-200 ${isSelected
-                                        ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md transform scale-105'
-                                        : 'border-gray-100 bg-white text-gray-600 hover:border-blue-200 hover:bg-blue-50/50 hover:shadow-sm'
+                                        ? 'border-[#fa0050] bg-rose-50 text-[#fa0050] shadow-md transform scale-105'
+                                        : 'border-gray-100 bg-white text-gray-600 hover:border-rose-200 hover:bg-rose-50/50 hover:shadow-sm'
                                         }`}
                                 >
                                     <span className="text-lg font-bold mb-1">{table.name}</span>
@@ -95,7 +95,7 @@ export function ZoneSelector({ zones, onTableSelect, selectedTable, selectedZone
                                     {isSelected && (
                                         <motion.div
                                             layoutId="selectedTableCheck"
-                                            className="absolute -top-2 -right-2 bg-blue-500 text-white rounded-full p-0.5 shadow-sm"
+                                            className="absolute -top-2 -right-2 bg-[#fa0050] text-white rounded-full p-0.5 shadow-sm"
                                         >
                                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />

@@ -30,6 +30,11 @@ export interface Businessman {
     created_at: string;
     updated_at: string;
     zones?: RestaurantZone[];
+
+    // Plan & Subscription
+    plan_type?: 'free' | 'essential' | 'premium' | 'enterprise'; // or plain string
+    subscription_status?: 'active' | 'past_due' | 'canceled' | 'incomplete' | 'trialing';
+    subscription_end?: string;
 }
 
 export interface RestaurantZone {
@@ -220,6 +225,7 @@ export interface CheckoutFormData {
 // Order Creation Payload
 export interface CreateOrderPayload {
     businessman_id: string;
+    source?: 'pos' | 'public' | 'kiosk'; // Identify origin of order
     client_name: string;
     client_phone: string;
     client_email?: string;

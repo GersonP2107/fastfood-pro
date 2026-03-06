@@ -1,13 +1,13 @@
 'use client';
 
 // ============================================================================
-// FoodFast Pro - Product Card Component (Horizontal Layout)
+// FoodFast Pro - Product Card Component (Modern UI Style)
 // ============================================================================
 
 import { useState } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import Image from 'next/image';
-import { Plus, Tag, Sparkles, Check } from 'lucide-react';
+import { Plus, Sparkles, Check } from 'lucide-react';
 import type { Product, Modifier } from '@/lib/types';
 import { useCartStore } from '@/lib/cart-store';
 import { formatCurrency, getImageUrl } from '@/lib/utils';
@@ -59,141 +59,120 @@ export function ProductCard({ product }: ProductCardProps) {
 
     return (
         <>
-            {/* Horizontal Card Layout */}
-            <div className="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex items-stretch md:h-40">
-                {/* Left Side - Product Info */}
-                <div className="flex-1 p-5 flex flex-col justify-between min-w-0">
-                    {/* Product Name */}
-                    <div className="mb-2">
-                        <h4 className="md:text-sm text-[16px] font-bold text-gray-900 mb-1">
-                            {product.name}
-                        </h4>
+            <div className="group bg-white rounded-[24px] shadow-[0_2px_15px_rgb(0,0,0,0.03)] transition-all duration-300 p-3 sm:p-4 flex gap-4 items-center relative overflow-hidden">
 
-                        {/* Badges */}
-                        <div className="flex flex-wrap gap-2 mb-2">
-                            {product.featured && (
-                                <span className="inline-flex items-center gap-1 bg-linear-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                    <Sparkles className="w-3 h-3" />
-                                    Destacado
-                                </span>
-                            )}
-                            {tieneDescuento && (
-                                <span className="inline-flex items-center bg-linear-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                    ¡Oferta!
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Description */}
-                        {product.description && (
-                            <p className="text-[14px] text-gray-600 line-clamp-2">
-                                {product.description}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Bottom Section - Price */}
-                    <div className="flex items-center gap-3 mt-auto pt-3">
-                        {/* Price */}
-                        <div className="flex flex-col">
-                            {tieneDescuento && (
-                                <span className="text-xs text-gray-400 line-through">
-                                    {formatCurrency(product.price)}
-                                </span>
-                            )}
-                            <span className="text-xl font-bold text-gray-900">
-                                {formatCurrency(precioFinal)}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Stock Warning */}
-                    {product.limited_stock && product.stock_quantity !== null && product.stock_quantity < 10 && (
-                        <div className="mt-2 bg-orange-50 border border-orange-200 rounded-lg px-2 py-1">
-                            <p className="text-xs text-orange-700 font-medium">
-                                ⚡ Solo quedan {product.stock_quantity}
-                            </p>
-                        </div>
-                    )}
-                </div>
-
-                {/* Right Side - Product Image */}
-                <div className="relative w-40 sm:w-40 shrink-0 bg-linear-to-br from-gray-100 to-gray-200">
+                {/* Left Side - Product Image (Square Rounded) */}
+                <div className="relative w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] shrink-0 rounded-[20px] overflow-hidden bg-gray-50 flex-none shadow-sm">
                     <Image
                         src={getImageUrl(product.image_url)}
                         alt={product.name}
                         fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 128px, 160px"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 640px) 110px, 130px"
                     />
 
-                    {/* Overlay linear for better image blend */}
-                    <div className="absolute inset-0 bg-linear-to-l from-transparent to-white/10" />
+                    {/* Offer Badge overlapping image */}
+                    {tieneDescuento && (
+                        <div className="absolute top-0 right-0 bg-[#fa0050] text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-bl-xl shadow-sm">
+                            ¡Oferta!
+                        </div>
+                    )}
+                </div>
 
-                    {/* Add Button - Positioned over image with animations */}
-                    <div className="absolute bottom-2 right-2 z-10">
-                        {/* Particles effect */}
-                        {showParticles && (
-                            <>
-                                {[...Array(6)].map((_, i) => (
-                                    <motion.div
-                                        key={i}
-                                        initial={{
-                                            opacity: 1,
-                                            scale: 1,
-                                            x: 0,
-                                            y: 0
-                                        }}
-                                        animate={{
-                                            opacity: 0,
-                                            scale: 0,
-                                            x: Math.cos((i * 60) * Math.PI / 180) * 40,
-                                            y: Math.sin((i * 60) * Math.PI / 180) * 40
-                                        }}
-                                        transition={{ duration: 0.6, ease: "easeOut" }}
-                                        className="absolute top-1/2 left-1/2 w-2 h-2 bg-green-400 rounded-full"
-                                        style={{
-                                            transform: 'translate(-50%, -50%)'
-                                        }}
-                                    />
-                                ))}
-                            </>
+                {/* Right Side - Product Info */}
+                <div className="flex-1 flex flex-col justify-between py-1 min-w-0 min-h-[110px] sm:min-h-[130px]">
+                    <div>
+                        {/* Tags / Badges */}
+                        {product.featured && (
+                            <div className="mb-1">
+                                <span className="inline-flex items-center gap-1 text-[#fa0050] bg-rose-50 text-[10px] font-bold px-2 py-0.5 rounded-full ring-1 ring-[#fa0050]/20">
+                                    <Sparkles className="w-2.5 h-2.5" />
+                                    Destacado
+                                </span>
+                            </div>
                         )}
 
-                        {/* Animated Button */}
-                        <motion.button
-                            onClick={handleClick}
-                            animate={controls}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            className={`relative overflow-hidden p-2.5 rounded-lg shadow-lg transition-all duration-300 ${isAdding
-                                ? 'bg-green-500'
-                                : 'bg-black hover:bg-blue-500 '
-                                } text-white`}
-                            aria-label="Agregar al carrito"
-                        >
-                            {/* Ripple effect */}
-                            {isAdding && (
-                                <motion.div
-                                    initial={{ scale: 0, opacity: 0.5 }}
-                                    animate={{ scale: 2, opacity: 0 }}
-                                    transition={{ duration: 0.6 }}
-                                    className="absolute inset-0 bg-white rounded-lg"
-                                />
+                        {/* Product Name */}
+                        <h4 className="text-base sm:text-lg font-extrabold text-gray-900 leading-tight mb-1 truncate">
+                            {product.name}
+                        </h4>
+
+                        {/* Description */}
+                        {product.description && (
+                            <p className="text-xs sm:text-sm text-gray-500 line-clamp-2 leading-snug">
+                                {product.description}
+                            </p>
+                        )}
+
+                        {/* Stock Warning */}
+                        {product.limited_stock && product.stock_quantity !== null && product.stock_quantity < 10 && (
+                            <span className="inline-block mt-1 text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
+                                ⏳ Solo quedan {product.stock_quantity}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Bottom Row - Price & Action */}
+                    <div className="flex items-end justify-between mt-auto pt-2">
+                        {/* Price */}
+                        <div className="flex flex-col">
+                            {tieneDescuento && (
+                                <span className="text-xs text-gray-400 line-through font-medium mb-0.5">
+                                    {formatCurrency(product.price)}
+                                </span>
+                            )}
+                            <span className="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight">
+                                {formatCurrency(precioFinal)}
+                            </span>
+                        </div>
+
+                        {/* Add Button - Pure Circle */}
+                        <div className="relative shrink-0">
+                            {/* Particles effect */}
+                            {showParticles && (
+                                <>
+                                    {[...Array(6)].map((_, i) => (
+                                        <motion.div
+                                            key={i}
+                                            initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                                            animate={{
+                                                opacity: 0,
+                                                scale: 0,
+                                                x: Math.cos((i * 60) * Math.PI / 180) * 40,
+                                                y: Math.sin((i * 60) * Math.PI / 180) * 40
+                                            }}
+                                            transition={{ duration: 0.6, ease: "easeOut" }}
+                                            className="absolute top-1/2 left-1/2 w-2 h-2 bg-[#fa0050] rounded-full z-20"
+                                            style={{ transform: 'translate(-50%, -50%)' }}
+                                        />
+                                    ))}
+                                </>
                             )}
 
-                            {/* Icon with transition */}
-                            <motion.div
-                                animate={isAdding ? { rotate: 360, scale: [1, 0, 1] } : {}}
-                                transition={{ duration: 0.4 }}
+                            <motion.button
+                                onClick={handleClick}
+                                animate={controls}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className={`relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md transition-all duration-300 z-10 ${isAdding ? 'bg-green-500 shadow-green-500/30' : 'bg-[#fa0050] hover:bg-[#d4003e] shadow-rose-500/20'
+                                    } text-white`}
+                                aria-label="Agregar al carrito"
                             >
-                                {isAdding ? (
-                                    <Check className="w-5 h-5" />
-                                ) : (
-                                    <Plus className="w-5 h-5" />
+                                {/* Ripple effect */}
+                                {isAdding && (
+                                    <motion.div
+                                        initial={{ scale: 0, opacity: 0.5 }}
+                                        animate={{ scale: 2, opacity: 0 }}
+                                        transition={{ duration: 0.6 }}
+                                        className="absolute inset-0 bg-white rounded-full"
+                                    />
                                 )}
-                            </motion.div>
-                        </motion.button>
+
+                                <motion.div animate={isAdding ? { rotate: 360, scale: [1, 0, 1] } : {}} transition={{ duration: 0.4 }}>
+                                    {isAdding ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : <Plus className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />}
+                                </motion.div>
+                            </motion.button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -49,7 +49,7 @@ export default async function HomePage() {
           <div className="text-center text-sm text-gray-500">
             <p className="mb-2">
               Powered by{' '}
-              <span className="font-semibold text-orange-600">FoodFast Pro</span>
+              <span className="font-semibold text-[#fa0050]">FoodFast Pro</span>
             </p>
             <p className="text-xs text-gray-400">
               Plataforma de menús digitales y pedidos en línea

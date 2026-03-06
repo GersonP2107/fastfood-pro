@@ -25,19 +25,19 @@ export function CategoryFilter({
     const [showMenu, setShowMenu] = useState(false);
 
     return (
-        <div className="sticky top-2 z-20 bg-white shadow-lg rounded-xl">
+        <div className={`sticky top-0 sm:top-2 z-30 bg-white/95 backdrop-blur-md shadow-[0_2px_15px_rgb(0,0,0,0.03)] transition-all duration-300 rounded-[24px]`}>
             <div className="container mx-auto px-4">
-                {/* Top Bar with Search and Menu */}
-                <div className="flex items-center gap-3 py-3">
+                {/* Top Bar with Action Buttons and Tabs */}
+                <div className="flex items-center gap-2 py-3">
                     {/* Search Icon */}
                     <button
                         onClick={() => {
                             setShowSearch(!showSearch);
                             if (showSearch) setSearchQuery('');
                         }}
-                        className={`p-2 rounded-lg transition-colors ${showSearch
-                            ? 'bg-gray-900 text-black'
-                            : 'hover:bg-gray-100 text-gray-600'
+                        className={`p-2.5 rounded-full transition-colors shrink-0 ${showSearch
+                            ? 'bg-[#fa0050] text-white'
+                            : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
                             }`}
                     >
                         {showSearch ? (
@@ -50,31 +50,30 @@ export function CategoryFilter({
                     {/* Menu Icon */}
                     <button
                         onClick={() => setShowMenu(!showMenu)}
-                        className={`p-2 rounded-lg transition-colors ${showMenu
-                            ? 'bg-gray-900 text-black'
-                            : 'hover:bg-gray-100 text-gray-600'
+                        className={`p-2.5 rounded-full transition-colors shrink-0 mr-1 ${showMenu
+                            ? 'bg-[#fa0050] text-white'
+                            : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
                             }`}
                     >
                         <Menu className="w-5 h-5" />
                     </button>
 
                     {/* Category Tabs - Horizontal Scroll */}
-                    <div className="flex-1 overflow-x-auto scrollbar-hide">
-                        <div className="flex gap-1 min-w-max">
+                    <div className="flex-1 overflow-x-auto scrollbar-hide -mr-4 pr-4">
+                        <div className="flex gap-4 min-w-max items-center h-full">
                             {/* All Categories Tab */}
                             <motion.button
                                 onClick={() => onSelectCategory(undefined)}
-                                whileTap={{ scale: 0.95 }}
-                                className={`relative px-4 py-2 font-semibold whitespace-nowrap transition-colors ${!selectedCategoryId
-                                    ? 'text-black'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                className={`relative py-2 transition-colors ${!selectedCategoryId
+                                    ? 'text-gray-900 font-black text-base'
+                                    : 'text-gray-400 font-medium text-sm hover:text-gray-700'
                                     }`}
                             >
                                 TODOS
                                 {!selectedCategoryId && (
                                     <motion.div
                                         layoutId="activeTab"
-                                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-black"
+                                        className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[4px] w-6 bg-[#fa0050] rounded-t-full"
                                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                     />
                                 )}
@@ -85,17 +84,16 @@ export function CategoryFilter({
                                 <motion.button
                                     key={categoria.id}
                                     onClick={() => onSelectCategory(categoria.id)}
-                                    whileTap={{ scale: 0.95 }}
-                                    className={`relative px-4 py-2 font-semibold whitespace-nowrap transition-colors uppercase text-sm ${selectedCategoryId === categoria.id
-                                        ? 'text-gray-900'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                    className={`relative py-2 transition-colors uppercase ${selectedCategoryId === categoria.id
+                                        ? 'text-gray-900 font-bold text-base'
+                                        : 'text-gray-400 font-medium text-sm hover:text-gray-700'
                                         }`}
                                 >
                                     {categoria.name}
                                     {selectedCategoryId === categoria.id && (
                                         <motion.div
                                             layoutId="activeTab"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-black"
+                                            className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[4px] w-6 bg-[#fa0050] rounded-t-full"
                                             transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                         />
                                     )}
@@ -122,7 +120,7 @@ export function CategoryFilter({
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Buscar productos..."
                                     autoFocus
-                                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-gray-900 transition-colors"
+                                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-full focus:outline-none focus:border-[#fa0050] transition-colors"
                                 />
                             </div>
                         </motion.div>
@@ -146,7 +144,7 @@ export function CategoryFilter({
                                         setShowMenu(false);
                                     }}
                                     className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${!selectedCategoryId
-                                        ? 'bg-gray-900 text-white'
+                                        ? 'bg-[#fa0050] text-white rounded-full'
                                         : 'hover:bg-gray-100 text-gray-700'
                                         }`}
                                 >
@@ -160,7 +158,7 @@ export function CategoryFilter({
                                             setShowMenu(false);
                                         }}
                                         className={`w-full text-left px-4 py-2 rounded-lg transition-colors uppercase text-sm ${selectedCategoryId === categoria.id
-                                            ? 'bg-gray-900 text-white'
+                                            ? 'bg-[#fa0050] text-white rounded-full'
                                             : 'hover:bg-gray-100 text-gray-700'
                                             }`}
                                     >

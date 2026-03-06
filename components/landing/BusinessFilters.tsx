@@ -78,13 +78,13 @@ export function BusinessFilters({ onFilterChange }: BusinessFiltersProps) {
             {/* Search Bar */}
             <div className="mb-8">
                 <div className="relative max-w-2xl mx-auto">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-[#fa0050] transition-colors" />
                     <input
                         type="search"
                         placeholder="¿Qué se te antoja hoy? (Ej: Hamburguesa, Sushi...)"
                         value={filters.searchTerm}
                         onChange={(e) => updateFilter('searchTerm', e.target.value)}
-                        className="w-full pl-16 pr-6 py-4 bg-gray-50/50 hover:bg-white border-0 rounded-full focus:ring-4 focus:ring-orange-100/50 focus:bg-white outline-none transition-all text-lg shadow-[0_2px_15px_rgb(0,0,0,0.05)] placeholder:text-gray-400"
+                        className="w-full pl-16 pr-6 py-4 bg-gray-50/50 hover:bg-white border-0 rounded-full focus:ring-4 focus:ring-rose-100/50 focus:bg-white outline-none transition-all text-lg shadow-[0_2px_15px_rgb(0,0,0,0.05)] placeholder:text-gray-400"
                     />
                 </div>
             </div>
@@ -94,14 +94,14 @@ export function BusinessFilters({ onFilterChange }: BusinessFiltersProps) {
                 {/* City Filter */}
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">
-                        <MapPin className="w-4 h-4 inline mr-1 text-orange-500" />
+                        <MapPin className="w-4 h-4 inline mr-1 text-[#fa0050]" />
                         Ciudad
                     </label>
                     <div className="relative">
                         <select
                             value={filters.selectedCity}
                             onChange={(e) => updateFilter('selectedCity', e.target.value)}
-                            className="w-full pl-4 pr-10 py-3 bg-gray-50/50 border-0 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:bg-white outline-none transition-all appearance-none cursor-pointer hover:bg-white shadow-[0_2px_10px_rgb(0,0,0,0.03)]"
+                            className="w-full pl-4 pr-10 py-3 bg-gray-50/50 border-0 rounded-xl focus:ring-2 focus:ring-[#fa0050]/20 focus:bg-white outline-none transition-all appearance-none cursor-pointer hover:bg-white shadow-[0_2px_10px_rgb(0,0,0,0.03)]"
                         >
                             <option value="">Todas las ciudades</option>
                             {CITIES.map((city) => (
@@ -121,7 +121,7 @@ export function BusinessFilters({ onFilterChange }: BusinessFiltersProps) {
                 {/* Delivery Zone Filter */}
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">
-                        <MapPin className="w-4 h-4 inline mr-1 text-orange-500" />
+                        <MapPin className="w-4 h-4 inline mr-1 text-[#fa0050]" />
                         Zona de entrega
                     </label>
                     <input
@@ -129,7 +129,7 @@ export function BusinessFilters({ onFilterChange }: BusinessFiltersProps) {
                         placeholder="Ej: El Poblado, Chapinero..."
                         value={filters.selectedZone}
                         onChange={(e) => updateFilter('selectedZone', e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-50/50 border-0 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:bg-white outline-none transition-all hover:bg-white shadow-[0_2px_10px_rgb(0,0,0,0.03)]"
+                        className="w-full px-4 py-3 bg-gray-50/50 border-0 rounded-xl focus:ring-2 focus:ring-[#fa0050]/20 focus:bg-white outline-none transition-all hover:bg-white shadow-[0_2px_10px_rgb(0,0,0,0.03)]"
                     />
                 </div>
             </div>
@@ -150,7 +150,7 @@ export function BusinessFilters({ onFilterChange }: BusinessFiltersProps) {
             {/* Business Type Filter - Chips */}
             <div className="border-t border-gray-100 pt-8">
                 <label className="block text-sm font-bold text-gray-700 mb-4 text-center">
-                    <UtensilsCrossed className="w-4 h-4 inline mr-2 text-orange-500" />
+                    <UtensilsCrossed className="w-4 h-4 inline mr-2 text-[#fa0050]" />
                     Explora por categorías
                 </label>
                 <div className="flex flex-wrap gap-3 justify-center">
@@ -164,8 +164,8 @@ export function BusinessFilters({ onFilterChange }: BusinessFiltersProps) {
                                 )
                             }
                             className={`px-5 py-2.5 rounded-full font-medium transition-all duration-200 border ${filters.selectedType === type.value
-                                ? 'bg-orange-500 text-white border-orange-600 shadow-md transform -translate-y-1'
-                                : 'bg-white text-gray-600 border-gray-200 hover:border-orange-200 hover:bg-orange-50'
+                                ? 'bg-[#fa0050] text-white border-[#d4003e] shadow-md transform -translate-y-1'
+                                : 'bg-white text-gray-600 border-gray-200 hover:border-rose-200 hover:bg-rose-50'
                                 }`}
                         >
                             <span className="mr-2">{type.emoji}</span>

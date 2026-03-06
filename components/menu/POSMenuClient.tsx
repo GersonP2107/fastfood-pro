@@ -67,7 +67,7 @@ export function POSMenuClient({
                     </div>
                 </div>
                 {selectedTable && (
-                    <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                    <div className="bg-rose-100 text-[#fa0050] px-3 py-1 rounded-full text-sm font-bold animate-pulse">
                         Mesa: {selectedTable}
                     </div>
                 )}

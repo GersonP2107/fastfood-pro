@@ -43,7 +43,7 @@ export function ModifierModal({ producto, onClose, onConfirm }: ModifierModalPro
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
             <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col animate-slide-in-up">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 relative">
+                <div className="bg-linear-to-r from-[#fa0050] to-[#d4003e] text-white p-6 relative">
                     <button
                         onClick={onClose}
                         className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
@@ -84,14 +84,14 @@ export function ModifierModal({ producto, onClose, onConfirm }: ModifierModalPro
                                     key={modificador.id}
                                     onClick={() => toggleModifier(modificador.id)}
                                     className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between ${isSelected
-                                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                                        ? 'border-[#fa0050] bg-rose-50 shadow-md'
                                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div
                                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected
-                                                ? 'border-blue-500 bg-blue-500'
+                                                ? 'border-[#fa0050] bg-[#fa0050]'
                                                 : 'border-gray-300'
                                                 }`}
                                         >
@@ -105,7 +105,7 @@ export function ModifierModal({ producto, onClose, onConfirm }: ModifierModalPro
                                         </div>
                                     </div>
                                     {modificador.additional_price > 0 && (
-                                        <span className="text-blue-600 font-bold text-sm">
+                                        <span className="text-[#fa0050] font-bold text-sm">
                                             +{formatCurrency(modificador.additional_price)}
                                         </span>
                                     )}
@@ -118,10 +118,10 @@ export function ModifierModal({ producto, onClose, onConfirm }: ModifierModalPro
                 {/* Footer */}
                 <div className="border-t border-gray-200 p-6 bg-gray-50">
                     {totalAdicional > 0 && (
-                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-gray-700">Extras seleccionados:</span>
-                                <span className="font-semibold text-blue-600">
+                                <span className="font-semibold text-[#fa0050]">
                                     +{formatCurrency(totalAdicional)}
                                 </span>
                             </div>
@@ -137,7 +137,7 @@ export function ModifierModal({ producto, onClose, onConfirm }: ModifierModalPro
 
                     <button
                         onClick={handleConfirm}
-                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+                        className="w-full bg-linear-to-r from-[#fa0050] to-[#d4003e] hover:from-[#d4003e] hover:to-[#c00038] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
                     >
                         <Plus className="w-5 h-5" />
                         Agregar al carrito

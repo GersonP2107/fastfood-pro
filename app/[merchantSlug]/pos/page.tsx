@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { POSMenuClient } from '@/components/menu/POSMenuClient';
 import { Metadata } from 'next';
 
@@ -38,6 +38,24 @@ export default async function POSPage({ params }: PageProps) {
     }
 
     const businessman = businessmanData as any;
+
+    // Plan & Subscription Validation
+    // 1. Limit access to POS for 'essential' plan
+    if (businessman.plan_type === 'essential') {
+        // Redirect to billing or show upgrade message
+        // Since POS is for staff, they check this.
+        console.log(`[POS Restriction] Blocking access for plan: ${businessman.plan_type}`);
+        // If user is not logged in (public access to POS link), dashboard redirect might be confusing but requested.
+        redirect('/dashboard/billing?upgrade=true&feature=pos');
+    }
+
+    // 2. Check Subscription Status
+    // "No permitiendo el uso del menu hasta que ya el pago alla sido renovado"
+    const allowedStatuses = ['active', 'trialing'];
+    if (businessman.subscription_status && !allowedStatuses.includes(businessman.subscription_status)) {
+        console.log(`[POS Restriction] Blocking access for subscription status: ${businessman.subscription_status}`);
+        redirect('/dashboard/billing?renew=true');
+    }
 
     // 2. Fetch Zones manually
     const { data: zonesData } = await supabase

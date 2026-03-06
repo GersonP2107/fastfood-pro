@@ -10,11 +10,11 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: 'hsl(220, 90%, 56%)',
-                    dark: 'hsl(220, 90%, 46%)',
-                    light: 'hsl(220, 90%, 66%)',
+                    DEFAULT: '#fa0050',
+                    dark: '#d4003e',
+                    light: '#ff3375',
                 },
-                accent: 'hsl(340, 82%, 52%)',
+                accent: '#fa0050',
                 success: 'hsl(142, 71%, 45%)',
                 warning: 'hsl(38, 92%, 50%)',
                 error: 'hsl(0, 84%, 60%)',

@@ -133,12 +133,12 @@ export function AddressForm({
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
                             {/* Customer Data - Collapsible */}
-                            <div className="border border-gray-200 rounded-xl overflow-hidden">
+                            <div className="border border-gray-100 rounded-[20px] overflow-hidden">
                                 <button
                                     onClick={() => setShowCustomerData(!showCustomerData)}
                                     className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
                                 >
-                                    <span className="font-semibold text-gray-900">Mis datos</span>
+                                    <span className="font-semibold text-gray-900">Mis datos personales</span>
                                     {showCustomerData ? (
                                         <ChevronUp className="w-5 h-5 text-gray-400" />
                                     ) : (
@@ -164,7 +164,7 @@ export function AddressForm({
                                             </div>
                                             <button
                                                 onClick={onEditCustomerInfo}
-                                                className="text-sm text-blue-500 font-medium"
+                                                className="text-sm text-[#fa0050] font-medium"
                                             >
                                                 @Cambiar
                                             </button>
@@ -183,10 +183,10 @@ export function AddressForm({
                                     onClick={() => setShowAddressForm(!showAddressForm)}
                                     whileHover={{ scale: 1.01 }}
                                     whileTap={{ scale: 0.99 }}
-                                    className="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2"
+                                    className="w-full bg-[#f8f9fa] hover:bg-gray-100 text-gray-800 py-3.5 px-4 rounded-[20px] font-bold text-[14px] transition-all duration-300 flex items-center justify-center gap-2 border border-gray-100"
                                 >
                                     <Plus className="w-5 h-5" />
-                                    Nueva dirección
+                                    Nueva dirección de entrega
                                 </motion.button>
 
                                 {/* Address Form */}
@@ -208,7 +208,7 @@ export function AddressForm({
                                                     value={street}
                                                     onChange={(e) => setStreet(e.target.value)}
                                                     placeholder="Carrera 18G"
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#fa0050] transition-colors text-sm"
                                                 />
                                             </div>
 
@@ -222,7 +222,7 @@ export function AddressForm({
                                                     value={number}
                                                     onChange={(e) => setNumber(e.target.value)}
                                                     placeholder="# 7D-34"
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#fa0050] transition-colors text-sm"
                                                 />
                                             </div>
 
@@ -234,7 +234,7 @@ export function AddressForm({
                                                 <select
                                                     value={neighborhood}
                                                     onChange={(e) => setNeighborhood(e.target.value)}
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors appearance-none bg-white text-sm"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#fa0050] transition-colors appearance-none bg-white text-sm"
                                                 >
                                                     <option value="">Selecciona tu barrio</option>
                                                     {deliveryZones.map((zone) => (
@@ -252,7 +252,7 @@ export function AddressForm({
                                                     value={references}
                                                     onChange={(e) => setReferences(e.target.value)}
                                                     placeholder="Referencias adicionales (opcional)"
-                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#fa0050] transition-colors text-sm"
                                                 />
                                             </div>
                                         </motion.div>
@@ -273,11 +273,11 @@ export function AddressForm({
                                                     setReferences(addr.references);
                                                     setShowAddressForm(true);
                                                 }}
-                                                className="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 p-3 rounded-xl cursor-pointer transition-all group"
+                                                className="bg-gray-50 hover:bg-rose-50 border border-gray-200 hover:border-rose-200 p-3 rounded-xl cursor-pointer transition-all group"
                                             >
                                                 <div className="flex items-start gap-3">
-                                                    <div className="p-2 bg-white rounded-lg shadow-sm group-hover:bg-blue-100 transition-colors">
-                                                        <MapPin className="w-5 h-5 text-gray-400 group-hover:text-blue-500" />
+                                                    <div className="p-2 bg-white rounded-lg shadow-sm group-hover:bg-rose-100 transition-colors">
+                                                        <MapPin className="w-5 h-5 text-gray-400 group-hover:text-[#fa0050]" />
                                                     </div>
                                                     <div className="flex-1">
                                                         <p className="font-semibold text-gray-900 text-sm">{addr.street} {addr.number}</p>
@@ -295,14 +295,14 @@ export function AddressForm({
                         </div>
 
                         {/* Footer - Confirm Button */}
-                        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+                        <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4">
                             <motion.button
                                 onClick={handleConfirm}
                                 whileHover={isFormValid ? { scale: 1.02 } : {}}
                                 whileTap={isFormValid ? { scale: 0.98 } : {}}
                                 disabled={!isFormValid}
-                                className={`w-full py-4 rounded-xl font-bold text-base transition-all duration-300 ${isFormValid
-                                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg'
+                                className={`w-full py-4 rounded-[20px] font-bold text-base transition-all duration-300 ${isFormValid
+                                    ? 'bg-[#fa0050] hover:bg-[#d4003e] text-white shadow-[0_4px_15px_rgba(250,0,80,0.3)] shadow-[#fa0050]/30'
                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                     }`}
                             >

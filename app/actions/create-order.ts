@@ -7,6 +7,32 @@ export async function createOrder(payload: CreateOrderPayload): Promise<ApiRespo
     const supabase = await createClient();
 
     try {
+        // 0. Validate Plan and Subscription
+        const { data: rawBusinessman, error: bizError } = await supabase
+            .from('businessmans')
+            .select('plan_type, subscription_status')
+            .eq('id', payload.businessman_id)
+            .single();
+
+        const businessman = rawBusinessman as any;
+
+        if (bizError || !businessman) {
+            return { error: 'No se pudo verificar la información del negocio.' };
+        }
+
+        // Check Subscription (Global Block)
+        const allowedStatuses = ['active', 'trialing'];
+        // Strict check: if status exists but not allowed -> Block
+        // If status is null (legacy/free?), allow? Assuming paid plans have status.
+        if (businessman.subscription_status && !allowedStatuses.includes(businessman.subscription_status)) {
+            return { error: 'El servicio está suspendido por falta de pago.' };
+        }
+
+        // Check POS Restriction (Specific Block)
+        if (payload.source === 'pos' && businessman.plan_type === 'essential') {
+            return { error: 'El sistema POS no está disponible en su plan actual (Esencial).' };
+        }
+
         // 1. Create the Order
         const { data: order, error: orderError } = await supabase
             .from('orders')

@@ -7,7 +7,7 @@ export function HeroSection() {
     return (
         <div className="relative overflow-hidden bg-white">
             {/* Background Pattern */}
-            <div className="absolute inset-0 bg-orange-50/50">
+            <div className="absolute inset-0 bg-rose-50/50">
                 <div className="absolute inset-0 opacity-[0.03]"
                     style={{
                         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ea580c' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -24,11 +24,11 @@ export function HeroSection() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-100 text-orange-700 font-medium text-sm mb-8"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-100 text-[#fa0050] font-medium text-sm mb-8"
                     >
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#fa0050] opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#fa0050]"></span>
                         </span>
                         La plataforma #1 de menús digitales
                     </motion.div>
@@ -39,7 +39,7 @@ export function HeroSection() {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6"
                     >
-                        FoodFast <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-amber-500">Pro</span>
+                        FoodFast <span className="text-transparent bg-clip-text bg-linear-to-r from-[#fa0050] to-[#ff3375]">Pro</span>
                     </motion.h1>
 
                     <motion.p

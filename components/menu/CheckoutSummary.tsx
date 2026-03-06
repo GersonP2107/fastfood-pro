@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, ChevronDown, ChevronUp, User, Phone, Lock } from 'lucide-react';
+import { ChevronRight, ChevronDown, ChevronUp, User, Phone } from 'lucide-react';
 import { useCartStore } from '@/lib/cart-store';
 import { formatCurrency, createWhatsAppMessage } from '@/lib/utils';
 import { Businessman, PaymentMethod } from '@/lib/types';
@@ -165,164 +165,124 @@ export function CheckoutSummary({
                         className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col overflow-y-auto"
                     >
                         {/* Header */}
-                        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between z-10">
-                            <div className="flex items-center gap-2">
-                                <Lock className="w-5 h-5" />
-                                <h2 className="text-lg font-bold">
-                                    {serviceType === 'takeout' ? 'Para llevar' : (serviceType === 'dine_in' ? `Mesa/Local ${tableNumber ? `(${tableNumber})` : ''}` : 'A domicilio')}
-                                </h2>
-                            </div>
+                        <div className="sticky top-0 bg-white p-4 flex items-center gap-3 z-10">
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="p-1 hover:bg-gray-50 rounded-full transition-colors"
                             >
-                                <X className="w-5 h-5" />
+                                <ChevronRight className="w-6 h-6 rotate-180" />
                             </button>
+                            <h2 className="text-xl font-extrabold text-[#111827]">
+                                {serviceType === 'takeout' ? 'Para llevar' : (serviceType === 'dine_in' ? `Mesa ${tableNumber || ''}` : 'Enviar pedido')}
+                            </h2>
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 p-4 space-y-4">
-                            {/* Order Summary */}
-                            <div className="bg-gray-50 rounded-xl p-4 flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-semibold text-gray-700">Resumen de cuenta</p>
-                                    <p className="text-xs text-gray-500">
-                                        {itemCount} producto{itemCount !== 1 ? 's' : ''} · {formatCurrency(subtotal)}
-                                    </p>
+                            {/* Address Row */}
+                            <div className="flex items-start py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors" onClick={onEditCustomerInfo}>
+                                <div className="mt-0.5 w-6 h-6 mr-3 text-gray-800">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                                 </div>
-                                <ChevronRight className="w-5 h-5 text-gray-400" />
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-gray-900 leading-tight mb-0.5">{deliveryAddress || 'Datos del cliente'}</h4>
+                                    <p className="text-sm text-gray-500 leading-tight line-clamp-2">{customerName} {customerPhone}</p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-gray-400 self-center" />
                             </div>
 
-                            {/* Customer Data */}
-                            <div className="border border-gray-200 rounded-xl overflow-hidden">
-                                <button
-                                    onClick={() => setShowCustomerData(!showCustomerData)}
-                                    className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                                >
-                                    <span className="font-semibold text-gray-900">Mis datos</span>
-                                    {showCustomerData ? (
-                                        <ChevronUp className="w-5 h-5 text-gray-400" />
-                                    ) : (
-                                        <ChevronDown className="w-5 h-5 text-gray-400" />
-                                    )}
-                                </button>
+                            {/* Service Type Row */}
+                            <div className="flex items-start py-4 border-b border-gray-100">
+                                <div className="mt-0.5 w-6 h-6 mr-3 text-gray-800">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-gray-900 leading-tight mb-0.5">
+                                        {serviceType === 'takeout' ? 'Recoger en local' : (serviceType === 'dine_in' ? 'Servicio a Mesa' : 'Entrega a domicilio')}
+                                    </h4>
+                                    <p className="text-sm text-gray-400">{(businessman as any).deliveryTime || 'Aprox 30-45 min'}</p>
+                                </div>
+                            </div>
 
-                                <AnimatePresence>
-                                    {showCustomerData && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            className="border-t border-gray-200 p-4 space-y-3"
-                                        >
-                                            <div className="flex items-center gap-3 text-sm">
-                                                <User className="w-4 h-4 text-gray-400" />
-                                                <span className="text-gray-700">Nombre: {customerName}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-sm">
-                                                <Phone className="w-4 h-4 text-gray-400" />
-                                                <span className="text-gray-700">Teléfono: {customerPhone}</span>
-                                            </div>
-                                            <button
-                                                onClick={onEditCustomerInfo}
-                                                className="text-sm text-blue-500 font-medium"
-                                            >
-                                                @Cambiar
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                            {/* Merchant & Items Details */}
+                            <div className="flex items-start py-4 border-b border-gray-100">
+                                <div className="mt-0.5 w-6 h-6 mr-3 text-gray-800">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-gray-900 leading-tight mb-1">{businessman.business_name}</h4>
+                                    <p className="text-sm text-gray-500 leading-tight">{itemCount} artículos separados</p>
+                                </div>
                             </div>
 
                             {/* Comment */}
-                            <div>
+                            <div className="py-4 border-b border-gray-100 flex items-start">
+                                <div className="mt-3 w-6 h-6 mr-3 text-gray-800">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                                </div>
                                 <textarea
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
-                                    placeholder="Agregar comentario (opcional)"
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors resize-none"
-                                    rows={2}
+                                    placeholder="Agregar notas para la entrega o preparación"
+                                    className="flex-1 p-0 mt-3 border-none bg-transparent focus:outline-none focus:ring-0 resize-none text-sm text-gray-800 placeholder:text-gray-400"
+                                    rows={1}
                                 />
                             </div>
 
-                            {/* Coupon */}
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="font-semibold text-gray-900">Cupón</span>
-                                    <button className="text-sm text-blue-500 font-medium">
-                                        Ver detalles
-                                    </button>
+                            {/* Tip section */}
+                            <div className="py-6 border-b border-gray-100">
+                                <div className="flex items-center gap-1 mb-1">
+                                    <h3 className="font-bold text-lg text-gray-900">Propina</h3>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-gray-400"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                                 </div>
-                                <input
-                                    type="text"
-                                    value={coupon}
-                                    onChange={(e) => setCoupon(e.target.value)}
-                                    placeholder="Ingresar cupón"
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-colors"
-                                />
-                            </div>
+                                <p className="text-sm text-gray-500 mb-4">Puedes agradecer al usuario repartidor con una propina.</p>
 
-                            {/* Tip */}
-                            <div>
-                                <span className="font-semibold text-gray-900 block mb-3">Propina</span>
-                                <div className="flex gap-2 flex-wrap">
-                                    <button
-                                        onClick={() => {
-                                            setTip(0);
-                                            setCustomTip('');
-                                        }}
-                                        className={`flex-1 py-2 px-3 rounded-lg border-2 font-medium text-sm transition-colors ${tip === 0 && !customTip
-                                            ? 'border-green-500 bg-green-50 text-green-700'
-                                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                                            }`}
-                                    >
-                                        No, gracias
-                                    </button>
+                                <div className="flex gap-2 flex-nowrap overflow-x-auto scrollbar-hide py-1">
                                     {/* Default Tip Options */}
-                                    {[1000, 2000, 3000].map((value) => (
+                                    {[1000, 2000, 3000, 5000].map((value) => (
                                         <button
                                             key={value}
                                             onClick={() => {
                                                 setTip(value);
-                                                setCustomTip('');
                                             }}
-                                            className={`px-3 py-2 rounded-lg border-2 font-medium text-sm transition-colors whitespace-nowrap ${tip === value
-                                                ? 'border-green-500 bg-green-50 text-green-700'
-                                                : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                                            className={`px-4 py-2 rounded-xl font-bold text-sm transition-colors whitespace-nowrap flex-none ${tip === value
+                                                ? 'bg-orange-50/70 text-[#fa0050]'
+                                                : 'bg-[#f8f9fa] text-gray-600 hover:bg-gray-100'
                                                 }`}
                                         >
                                             ${value.toLocaleString('es-CO')}
                                         </button>
                                     ))}
-                                    <input
-                                        type="number"
-                                        value={customTip}
-                                        onChange={(e) => {
-                                            setCustomTip(e.target.value);
-                                            setTip(parseInt(e.target.value) || 0);
-                                        }}
-                                        placeholder="$ Otro"
-                                        className="w-24 px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-black transition-colors text-sm"
-                                    />
+                                    <button
+                                        onClick={() => { setTip(0); }}
+                                        className={`px-4 py-2 rounded-xl font-bold text-sm transition-colors whitespace-nowrap flex-none ${tip === 0
+                                            ? 'bg-orange-50/70 text-[#fa0050]'
+                                            : 'bg-[#f8f9fa] text-gray-600 hover:bg-gray-100'
+                                            }`}
+                                    >Ninguna</button>
                                 </div>
                             </div>
 
                             {/* Payment Method */}
-                            <div>
-                                <span className="font-semibold text-gray-900 block mb-2">Método de pago</span>
-                                <p className="text-xs text-gray-500 mb-3">Selecciona cómo deseas pagar</p>
-                                <select
-                                    value={selectedPaymentMethodId}
-                                    onChange={(e) => setSelectedPaymentMethodId(e.target.value)}
-                                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors appearance-none bg-white"
-                                >
-                                    <option value="">Seleccione un método</option>
-                                    {activePaymentMethods.map((pm, index) => (
-                                        <option key={index} value={pm.name}>
-                                            {pm.name}
-                                        </option>
-                                    ))}
-                                </select>
+                            <div className="py-4">
+                                <div className="flex items-center">
+                                    <div className="w-6 h-6 mr-3 text-gray-800 flex items-center justify-center">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+                                    </div>
+                                    <select
+                                        value={selectedPaymentMethodId}
+                                        onChange={(e) => setSelectedPaymentMethodId(e.target.value)}
+                                        className="flex-1 bg-transparent font-semibold text-gray-900 leading-tight focus:outline-none appearance-none"
+                                    >
+                                        <option value="" disabled>Seleccionar pago</option>
+                                        {activePaymentMethods.map((pm, index) => (
+                                            <option key={index} value={pm.name}>
+                                                {pm.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <ChevronRight className="w-5 h-5 text-gray-400 pointer-events-none" />
+                                </div>
 
                                 {/* Payment Instructions */}
                                 <AnimatePresence>
@@ -331,19 +291,16 @@ export function CheckoutSummary({
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            className="mt-3 bg-blue-50 border border-blue-200 rounded-xl p-4 overflow-hidden"
+                                            className="mt-4 bg-orange-50/50 rounded-xl p-4 overflow-hidden ml-9"
                                         >
-                                            <p className="text-sm font-semibold text-blue-900 mb-1">
-                                                Instrucciones:
-                                            </p>
-                                            <p className="text-sm text-blue-800 leading-relaxed whitespace-pre-wrap">
+                                            <p className="text-sm text-[#fa0050] leading-relaxed whitespace-pre-wrap">
                                                 {selectedPaymentMethod.instructions}
                                             </p>
 
                                             {selectedPaymentMethod.number && (
-                                                <div className="mt-2 flex items-center gap-2 bg-white/50 p-2 rounded-lg">
-                                                    <span className="text-xs font-bold text-blue-900 uppercase">Cuenta:</span>
-                                                    <code className="text-sm font-mono text-blue-800">{selectedPaymentMethod.number}</code>
+                                                <div className="mt-2 flex items-center gap-2">
+                                                    <span className="text-xs font-bold text-gray-500 uppercase">Cuenta:</span>
+                                                    <code className="text-sm font-bold text-gray-900">{selectedPaymentMethod.number}</code>
                                                 </div>
                                             )}
                                         </motion.div>
@@ -357,38 +314,61 @@ export function CheckoutSummary({
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            className="mt-3"
+                                            className="mt-3 ml-9"
                                         >
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                $ ¿Con cuánto vas a pagar?
-                                            </label>
                                             <input
                                                 type="number"
                                                 value={cashAmount}
-                                                placeholder="Ej: 50000"
-                                                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                                                placeholder="$ ¿Con cuánto vas a pagar?"
+                                                className="w-full p-3 bg-[#f8f9fa] rounded-xl focus:outline-none focus:ring-1 focus:ring-[#fa0050] transition-colors text-sm font-medium"
                                                 onChange={(e) => setCashAmount(e.target.value)}
                                             />
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                             </div>
+
+                            {/* Totals Summary */}
+                            <div className="pt-2 pb-8 space-y-2 ml-9">
+                                <div className="flex justify-between items-center text-[15px] font-bold text-gray-900">
+                                    <span>Tarifa art.</span>
+                                    <span>{formatCurrency(subtotal)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[14px] text-gray-500">
+                                    <span>Costo envío</span>
+                                    <span>{formatCurrency(shippingCost)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[14px] text-gray-500">
+                                    <span>Propina</span>
+                                    <span>{formatCurrency(tip)}</span>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Footer - Submit Button */}
-                        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
-                            <motion.button
-                                onClick={handleSubmitOrder}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                disabled={!selectedPaymentMethod || isSubmitting}
-                                className={`w-full py-4 rounded-xl font-bold text-base transition-all duration-300 ${selectedPaymentMethod && !isSubmitting
-                                    ? 'bg-blue-500 hover:bg-blue-500 text-white shadow-lg'
-                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                    }`}
-                            >
-                                {isSubmitting ? 'Procesando...' : `Pedir (${formatCurrency(total)})`}
-                            </motion.button>
+                        {/* Sticky Bottom Real Checkout Bar */}
+                        <div className="sticky bottom-0 bg-white pt-2 pb-6 px-4 shadow-[0_-15px_40px_rgba(0,0,0,0.08)] z-20">
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex flex-col">
+                                    <span className="text-[24px] sm:text-[26px] font-black tracking-tight leading-none text-[#111827]">
+                                        {formatCurrency(total)}
+                                    </span>
+                                    <span className="text-[#fa0050] text-[12px] font-bold mt-1">
+                                        Total a pagar
+                                    </span>
+                                </div>
+                                <motion.button
+                                    onClick={handleSubmitOrder}
+                                    disabled={!selectedPaymentMethod || isSubmitting}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className={`py-3.5 px-10 rounded-[20px] font-bold text-lg transition-all ${(!selectedPaymentMethod || isSubmitting)
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        : 'bg-[#fa0050] hover:bg-[#d4003e] text-white shadow-[0_4px_15px_rgba(250,0,80,0.3)] shadow-[#fa0050]/30'
+                                        }`}
+                                >
+                                    {isSubmitting ? 'Procesando...' : 'Pagar'}
+                                </motion.button>
+                            </div>
                         </div>
                     </motion.div>
                 </>
