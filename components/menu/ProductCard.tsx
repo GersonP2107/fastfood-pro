@@ -59,7 +59,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
     return (
         <>
-            <div className="group bg-white rounded-[24px] shadow-[0_2px_15px_rgb(0,0,0,0.03)] transition-all duration-300 p-3 sm:p-4 flex gap-4 items-center relative overflow-hidden">
+            <div className="group bg-white rounded-[24px] shadow-sm transition-all duration-300 p-3 sm:p-4 flex gap-4 items-center relative overflow-hidden">
 
                 {/* Left Side - Product Image (Square Rounded) */}
                 <div className="relative w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] shrink-0 rounded-[20px] overflow-hidden bg-gray-50 flex-none shadow-sm">

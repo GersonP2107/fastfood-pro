@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronDown, ChevronUp, User, Phone } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useCartStore } from '@/lib/cart-store';
 import { formatCurrency, createWhatsAppMessage } from '@/lib/utils';
 import { Businessman, PaymentMethod } from '@/lib/types';
@@ -38,11 +38,8 @@ export function CheckoutSummary({
     shippingCost
 }: CheckoutSummaryProps) {
     const { items, getTotal, getItemCount } = useCartStore();
-    const [showCustomerData, setShowCustomerData] = useState(false);
     const [comment, setComment] = useState('');
-    const [coupon, setCoupon] = useState('');
     const [tip, setTip] = useState<number>(0);
-    const [customTip, setCustomTip] = useState('');
     const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState('');
     const [cashAmount, setCashAmount] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,7 +122,7 @@ export function CheckoutSummary({
                 paymentInfo,
                 serviceType,
                 businessman.business_name,
-                comment + (coupon ? ` (Cupón: ${coupon})` : '') + (tableNumber ? `\n\n🍽️ Mesa: ${tableNumber}` : '') + (cashAmount ? `\n\n💵 Paga con: ${formatCurrency(parseInt(cashAmount) || 0)}` : '')
+                comment + (tableNumber ? `\n\n🍽️ Mesa: ${tableNumber}` : '') + (cashAmount ? `\n\n💵 Paga con: ${formatCurrency(parseInt(cashAmount) || 0)}` : '')
             );
 
             // 3. Open WhatsApp
@@ -172,9 +169,9 @@ export function CheckoutSummary({
                             >
                                 <ChevronRight className="w-6 h-6 rotate-180" />
                             </button>
-                            <h2 className="text-xl font-extrabold text-[#111827]">
+                            <h3 className="text-lg font-bold text-[#111827]">
                                 {serviceType === 'takeout' ? 'Para llevar' : (serviceType === 'dine_in' ? `Mesa ${tableNumber || ''}` : 'Enviar pedido')}
-                            </h2>
+                            </h3>
                         </div>
 
                         {/* Content */}
@@ -200,7 +197,7 @@ export function CheckoutSummary({
                                     <h4 className="font-semibold text-gray-900 leading-tight mb-0.5">
                                         {serviceType === 'takeout' ? 'Recoger en local' : (serviceType === 'dine_in' ? 'Servicio a Mesa' : 'Entrega a domicilio')}
                                     </h4>
-                                    <p className="text-sm text-gray-400">{(businessman as any).deliveryTime || 'Aprox 30-45 min'}</p>
+                                    <p className="text-sm text-gray-400">{(businessman as Businessman & { deliveryTime?: string }).deliveryTime || 'Aprox 30-45 min'}</p>
                                 </div>
                             </div>
 
@@ -264,7 +261,7 @@ export function CheckoutSummary({
                             </div>
 
                             {/* Payment Method */}
-                            <div className="py-4">
+                            <div className="bg-white shadow-sm rounded-[24px] p-4">
                                 <div className="flex items-center">
                                     <div className="w-6 h-6 mr-3 text-gray-800 flex items-center justify-center">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
@@ -286,15 +283,15 @@ export function CheckoutSummary({
 
                                 {/* Payment Instructions */}
                                 <AnimatePresence>
-                                    {selectedPaymentMethod && (
+                                    {selectedPaymentMethod && (selectedPaymentMethod.instructions || selectedPaymentMethod.type !== 'efectivo') && (
                                         <motion.div
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            className="mt-4 bg-orange-50/50 rounded-xl p-4 overflow-hidden ml-9"
+                                            className="mt-4 bg-[#f8f9fa] rounded-[16px] p-4 overflow-hidden"
                                         >
-                                            <p className="text-sm text-[#fa0050] leading-relaxed whitespace-pre-wrap">
-                                                {selectedPaymentMethod.instructions}
+                                            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                                {selectedPaymentMethod.instructions || '💵 Paga en efectivo al momento de recibir tu pedido. Por favor ten el monto exacto listo.'}
                                             </p>
 
                                             {selectedPaymentMethod.number && (
@@ -314,13 +311,13 @@ export function CheckoutSummary({
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            className="mt-3 ml-9"
+                                            className="mt-4 overflow-hidden"
                                         >
                                             <input
                                                 type="number"
                                                 value={cashAmount}
                                                 placeholder="$ ¿Con cuánto vas a pagar?"
-                                                className="w-full p-3 bg-[#f8f9fa] rounded-xl focus:outline-none focus:ring-1 focus:ring-[#fa0050] transition-colors text-sm font-medium"
+                                                className="w-full px-4 py-3  bg-[#f8f9fa] border border-transparent rounded-[16px] focus:outline-none focus:ring-2 focus:ring-[#fa0050]/20 focus:border-[#fa0050] transition-all text-gray-900 font-semibold placeholder:font-normal placeholder:text-gray-400"
                                                 onChange={(e) => setCashAmount(e.target.value)}
                                             />
                                         </motion.div>
@@ -329,7 +326,7 @@ export function CheckoutSummary({
                             </div>
 
                             {/* Totals Summary */}
-                            <div className="pt-2 pb-8 space-y-2 ml-9">
+                            <div className="pt-2 pb-8 space-y-2 px-1">
                                 <div className="flex justify-between items-center text-[15px] font-bold text-gray-900">
                                     <span>Tarifa art.</span>
                                     <span>{formatCurrency(subtotal)}</span>

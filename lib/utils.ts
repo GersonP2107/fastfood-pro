@@ -121,7 +121,11 @@ export function getStatusColor(status: string): string {
  * Generate formatted WhatsApp message for order
  */
 export function createWhatsAppMessage(
-    orderItems: any[],
+    orderItems: Array<{
+        quantity: number;
+        product: { name: string };
+        modifiers_selected?: Array<{ name: string }>;
+    }>,
     subtotal: number,
     total: number,
     customerData: { name: string; phone: string; address?: string },
@@ -143,7 +147,7 @@ export function createWhatsAppMessage(
 
         // Modifiers
         if (item.modifiers_selected && item.modifiers_selected.length > 0) {
-            const mods = item.modifiers_selected.map((m: any) => m.name).join(', ');
+            const mods = item.modifiers_selected.map((m: { name: string }) => m.name).join(', ');
             message += `   + ${mods}\n`;
         }
 

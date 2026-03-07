@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Businessman } from '@/lib/types';
 import { BusinessFilters, FilterState } from '@/components/landing/BusinessFilters';
 import { MapPin, Clock, Phone } from 'lucide-react';
@@ -103,10 +104,12 @@ export function BusinessDirectory({ businesses, deliveryZones }: BusinessDirecto
                             {/* Logo/Image */}
                             <div className="relative h-56 bg-linear-to-br from-rose-50 to-pink-50 overflow-hidden">
                                 {biz.logo_url ? (
-                                    <img
+                                    <Image
                                         src={biz.logo_url}
                                         alt={biz.business_name}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, 33vw"
+                                        className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">

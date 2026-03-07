@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated Supabase types (may be binary or auto-generated)
+    "lib/supabase/database.types.ts",
+    // Node.js CommonJS scripts (not part of the app bundle)
+    "scripts/**",
+    // Developer-only diagnostic page (uses any extensively for raw API inspection)
+    "app/diagnostic/**",
   ]),
 ]);
 

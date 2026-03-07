@@ -7,6 +7,7 @@
 import { X, MapPin, Clock, Phone, MessageCircle, Instagram, Share2 } from 'lucide-react';
 import { DeliveryZone, ScheduleItem } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
+import Image from 'next/image';
 
 // Helper to format time (e.g. "08:00" -> "8:00 AM")
 const formatTime12h = (time24: string) => {
@@ -81,7 +82,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
             <div className="bg-white rounded-[24px] shadow-2xl max-w-2xl w-full my-8 animate-slide-in-up">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                    <h2 className="text-xl font-extrabold text-gray-900">Información del negocio</h2>
+                    <h3 className="text-lg font-bold text-gray-900">Información del negocio</h3>
                     <button
                         onClick={onClose}
                         className="p-1 hover:bg-gray-50 rounded-full transition-colors"
@@ -102,11 +103,13 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
 
                     {/* Business Name and Logo */}
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-[20px] overflow-hidden bg-gray-50 shrink-0">
-                            <img
+                        <div className="w-16 h-16 rounded-[20px] overflow-hidden bg-gray-50 shrink-0 relative">
+                            <Image
                                 src={businessInfo.logo}
                                 alt={businessInfo.name}
-                                className="w-full h-full object-cover"
+                                fill
+                                sizes="64px"
+                                className="object-cover"
                             />
                         </div>
                         <div className="flex-1">
@@ -145,7 +148,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                     {/* Address */}
                     <div className="border-t border-gray-100 pt-6">
                         <h4 className="font-semibold text-gray-900 mb-3 text-[15px]">Dirección</h4>
-                        <div className="flex items-start gap-3 bg-[#f8f9fa] p-4 rounded-[20px] shadow-[0_2px_10px_rgb(0,0,0,0.03)] border border-white">
+                        <div className="flex items-start gap-3 bg-[#f8f9fa] p-4 rounded-[24px] shadow-sm border border-white">
                             <MapPin className="w-5 h-5 text-[#fa0050] shrink-0 mt-0.5" />
                             <div>
                                 <p className="font-medium text-gray-900">{businessInfo.address}</p>
@@ -163,7 +166,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                         <h4 className="font-semibold text-gray-900 mb-3 text-[15px]">Tipos de servicio</h4>
 
                         {/* Delivery */}
-                        <div className="flex items-center justify-between p-4 bg-[#f8f9fa] rounded-[20px] mb-3 shadow-[0_2px_10px_rgb(0,0,0,0.03)] border border-white">
+                        <div className="flex items-center justify-between p-4 bg-[#f8f9fa] rounded-[24px] mb-3 shadow-sm border border-white">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-white rounded-full shadow-sm">
                                     <svg className="w-5 h-5 text-[#fa0050]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,7 +190,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                         </div>
 
                         {/* Pickup */}
-                        <div className="flex items-center justify-between p-4 bg-[#f8f9fa] rounded-[20px] shadow-[0_2px_10px_rgb(0,0,0,0.03)] border border-white">
+                        <div className="flex items-center justify-between p-4 bg-[#f8f9fa] rounded-[24px] shadow-sm border border-white">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-white rounded-full shadow-sm">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#fa0050]"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
@@ -208,7 +211,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                     {/* Delivery Coverage */}
                     <div className="border-t border-gray-100 pt-6">
                         <h4 className="font-semibold text-gray-900 mb-3 text-[15px]">Cobertura de entrega</h4>
-                        <div className="bg-[#f8f9fa] rounded-[20px] p-4 max-h-60 overflow-y-auto shadow-[0_2px_10px_rgb(0,0,0,0.03)] border border-white">
+                        <div className="bg-[#f8f9fa] rounded-[24px] p-4 max-h-60 overflow-y-auto shadow-sm border border-white">
                             <p className="text-sm font-medium text-gray-600 mb-4">
                                 Zonas disponibles para domicilio:
                             </p>
@@ -237,7 +240,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                     {/* Schedule */}
                     <div className="border-t border-gray-100 pt-6">
                         <h4 className="font-semibold text-gray-900 mb-4 text-[15px]">Horarios de atención</h4>
-                        <div className="space-y-1 bg-[#f8f9fa] rounded-[20px] p-2 shadow-[0_2px_10px_rgb(0,0,0,0.03)] border border-white">
+                        <div className="space-y-1 bg-[#f8f9fa] rounded-[24px] p-2 shadow-sm border border-white">
                             {orderedDays.map((dayKey) => {
                                 const schedule = businessInfo.operatingSchedule.find(s => s.day === dayKey);
                                 const isToday = dayKey === new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
@@ -273,7 +276,7 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                             href={whatsappLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 flex items-center justify-center gap-2 bg-[#f8f9fa] hover:bg-green-50 text-gray-800 hover:text-green-600 py-3.5 px-4 rounded-[20px] transition-all font-bold border border-transparent hover:border-green-100"
+                            className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3.5 px-4 rounded-[20px] transition-all font-bold border border-transparent hover:border-green-100"
                         >
                             <MessageCircle className="w-5 h-5" />
                             Escribir por WhatsApp

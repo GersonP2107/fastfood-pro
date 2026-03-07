@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RestaurantZone, RestaurantTable } from '@/lib/types';
-import { ChevronRight, Users } from 'lucide-react';
+import { RestaurantZone } from '@/lib/types';
+import { Users } from 'lucide-react';
 
 interface ZoneSelectorProps {
     zones: RestaurantZone[];
@@ -28,6 +28,7 @@ export function ZoneSelector({ zones, onTableSelect, selectedTable, selectedZone
     useEffect(() => {
         if (selectedZoneName) {
             const found = zones.find(z => z.name === selectedZoneName);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             if (found) setSelectedZoneId(found.id);
         }
     }, [selectedZoneName, zones]);

@@ -25,7 +25,7 @@ export function CategoryFilter({
     const [showMenu, setShowMenu] = useState(false);
 
     return (
-        <div className={`sticky top-0 sm:top-2 z-30 bg-white/95 backdrop-blur-md shadow-[0_2px_15px_rgb(0,0,0,0.03)] transition-all duration-300 rounded-[24px]`}>
+        <div className={`sticky top-0 sm:top-2 z-30 bg-white/95 backdrop-blur-md shadow-sm transition-all duration-300 rounded-[24px]`}>
             <div className="container mx-auto px-4">
                 {/* Top Bar with Action Buttons and Tabs */}
                 <div className="flex items-center gap-2 py-3">

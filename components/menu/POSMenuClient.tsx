@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Businessman, Category, Product, DeliveryZone, RestaurantZone, RestaurantTable, Order } from '@/lib/types';
+import { Businessman, Category, Product, DeliveryZone, RestaurantZone } from '@/lib/types';
 import { Cart } from './Cart';
 import { MenuDisplay } from './MenuDisplay';
 import { ZoneSelector } from './ZoneSelector';
@@ -21,7 +21,7 @@ export function POSMenuClient({
     products,
     deliveryZones
 }: POSMenuClientProps) {
-    const { items, clearCart } = useCartStore();
+    const { items } = useCartStore();
     const searchParams = useSearchParams();
 
     // Initialize state from URL params if available
@@ -34,6 +34,7 @@ export function POSMenuClient({
         if (items.length > 0) {
             // Optional check logic
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Update state if URL params change (e.g. navigation)
@@ -55,6 +56,7 @@ export function POSMenuClient({
             <header className="bg-white sticky top-0 z-40 border-b border-gray-200 shadow-sm px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={businessman.logo_url || "https://placehold.net/main.svg"}
                             alt={businessman.business_name}

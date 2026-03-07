@@ -8,7 +8,7 @@ import { BusinessInfoModal } from '@/components/menu/BusinessInfoModal';
 import { MapPin, Clock, Phone, MessageCircle, Info } from 'lucide-react';
 import Image from 'next/image';
 
-import { DeliveryZone, ScheduleItem } from '@/lib/types';
+import { Businessman, DeliveryZone, ScheduleItem } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { checkBusinessStatus } from '@/lib/utils';
 
@@ -48,7 +48,9 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
     }, [businessman.id, items, clearCart]);
 
     // Calculate if currently open using shared utility
-    const { isOpen: isOpenNow, message: statusMessage } = checkBusinessStatus(businessman as any); // Cast to any to avoid type mismatch if partial
+    const { isOpen: isOpenNow, message: statusMessage } = checkBusinessStatus(
+        businessman as Pick<typeof businessman, 'accept_orders' | 'operating_schedule'>
+    );
 
     // Default values to ensure good UX even with missing data
     const businessInfo = {
@@ -75,8 +77,9 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Modern Top Banner Section */}
-            <div className="relative h-56 md:h-72 bg-gray-100 overflow-hidden">
+            <div className="relative h-52 md:h-80 lg:h-96 bg-gray-100 overflow-hidden">
                 {businessInfo.banner ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                         src={businessInfo.banner}
                         alt="Banner"
@@ -92,6 +95,8 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
 
                 {/* Gradient overlay for contrast */}
                 <div className="absolute inset-x-0 top-0 h-32 bg-linear-to-b from-black/50 to-transparent" />
+                {/* Bottom gradient for smoother card blend */}
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-white/20 to-transparent" />
 
                 {/* Status Badge - Top Left */}
                 <div className="absolute top-4 left-4 z-10">
@@ -99,7 +104,7 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                         ? 'bg-black/40 text-white'
                         : 'bg-red-500/90 text-white'
                         }`}>
-                        <div className={`w-2.5 h-2.5 rounded-full ${businessInfo.acceptOrders ? 'bg-green-400' : 'bg-red-300'}`} />
+                        <div className={`w-2.5 h-2.5 rounded-full ${businessInfo.acceptOrders ? 'bg-green-400 animate-pulse' : 'bg-red-300'}`} />
                         <span className="font-bold text-sm tracking-wide">
                             {businessInfo.acceptOrders ? 'Abierto' : 'Cerrado'}
                         </span>
@@ -113,11 +118,13 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
             </div>
 
             {/* Main Content Overlapping Card */}
-            <div className="relative z-20 -mt-8 bg-white rounded-[32px] md:rounded-[40px] py-6 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
-                <div className="container mx-auto max-w-3xl px-4 md:px-6">
+            <div className="relative z-20 -mt-8 md:-mt-12 bg-white rounded-t-[32px] md:rounded-[40px] pt-6 pb-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+                <div className="container mx-auto max-w-4xl px-5 md:px-10">
+
                     {/* Header Row: Logo & Name */}
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-full shadow-lg overflow-hidden bg-white ring-4 ring-white">
+                    <div className="flex items-end md:items-center gap-4 md:gap-6 mb-6">
+                        {/* Logo */}
+                        <div className="relative w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 shrink-0 rounded-[20px] md:rounded-[24px] shadow-lg overflow-hidden bg-white ring-4 ring-white">
                             <Image
                                 src={businessInfo.logo}
                                 alt={businessInfo.name}
@@ -125,23 +132,35 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                                 className="object-cover"
                             />
                         </div>
-                        <div className="flex-1">
-                            <h1 className="text-sm md:text-lg font-extrabold text-gray-900 leading-tight">
+
+                        {/* Name & Address */}
+                        <div className="flex-1 pb-1">
+                            <h1 className="text-xl md:text-3xl lg:text-4xl font-black text-gray-900 leading-tight tracking-tight">
                                 {businessInfo.name}
                             </h1>
-                            <div className="flex items-start gap-1.5 text-sm text-gray-500 mt-1.5">
-                                <MapPin className="w-4 h-4 shrink-0 text-gray-400 mt-0.5" />
-                                <span className="leading-snug">{businessInfo.address} {[businessInfo.city, businessInfo.department].filter(Boolean).join(', ')}</span>
+                            {businessInfo.description && (
+                                <p className="hidden md:block text-sm text-gray-500 mt-1 leading-snug line-clamp-2">
+                                    {businessInfo.description}
+                                </p>
+                            )}
+                            <div className="flex items-start gap-1.5 text-sm text-gray-400 mt-1.5">
+                                <MapPin className="w-4 h-4 shrink-0 text-gray-300 mt-0.5" />
+                                <span className="leading-snug text-xs md:text-sm">
+                                    {[businessInfo.address, businessInfo.city, businessInfo.department].filter(Boolean).join(', ')}
+                                </span>
                             </div>
                         </div>
                     </div>
+
+                    {/* Divider */}
+                    <div className="hidden md:block border-t border-gray-100 mb-5" />
 
                     {/* Delivery & Action Pills Row */}
                     <div className="flex flex-col sm:flex-row gap-3">
                         {/* Delivery Time (Prominent Pill) */}
                         <div className="flex-1 bg-gray-50 hover:bg-gray-100 transition-colors rounded-[20px] p-4 flex items-center justify-between cursor-default">
                             <div className="flex items-center gap-3 text-gray-900 font-bold text-base">
-                                <span className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                                <span className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
                                     <Clock className="w-4 h-4 text-[#fa0050]" />
                                 </span>
                                 <div>
@@ -151,27 +170,30 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                             </div>
                         </div>
 
-                        {/* Actions Array */}
+                        {/* Actions */}
                         <div className="flex gap-2">
                             <a
                                 href={whatsappLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex flex-col flex-1 sm:flex-none items-center justify-center bg-green-50 hover:bg-green-100 w-full sm:w-16 rounded-[20px] transition-colors py-3 sm:py-0 group"
+                                className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold px-4 md:px-6 rounded-[20px] transition-colors py-3 group min-w-[52px]"
                             >
-                                <MessageCircle className="w-6 h-6 text-green-600 group-hover:scale-110 transition-transform" />
+                                <MessageCircle className="w-5 h-5 shrink-0" />
+                                <span className="hidden md:inline text-sm">WhatsApp</span>
                             </a>
                             <a
                                 href={`tel:${businessInfo.phone}`}
-                                className="flex flex-col flex-1 sm:flex-none items-center justify-center bg-gray-50 hover:bg-gray-100 w-full sm:w-16 rounded-[20px] transition-colors py-3 sm:py-0 group"
+                                className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 md:px-5 rounded-[20px] transition-colors py-3 group min-w-[52px]"
                             >
-                                <Phone className="w-6 h-6 text-gray-700 group-hover:scale-110 transition-transform" />
+                                <Phone className="w-5 h-5 shrink-0" />
+                                <span className="hidden md:inline text-sm">Llamar</span>
                             </a>
                             <button
                                 onClick={() => setShowInfoModal(true)}
-                                className="flex flex-col flex-1 sm:flex-none items-center justify-center bg-gray-50 hover:bg-gray-100 w-full sm:w-16 rounded-[20px] transition-colors py-3 sm:py-0 group"
+                                className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 md:px-5 rounded-[20px] transition-colors py-3 group min-w-[52px]"
                             >
-                                <Info className="w-6 h-6 text-gray-700 group-hover:scale-110 transition-transform" />
+                                <Info className="w-5 h-5 shrink-0" />
+                                <span className="hidden md:inline text-sm">Info</span>
                             </button>
                         </div>
                     </div>
@@ -197,7 +219,7 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                The 'businessman' prop here comes from the page props which uses the Businessman type. 
             */}
             <Cart
-                businessman={businessman as any}
+                businessman={businessman as unknown as Businessman}
                 deliveryZones={deliveryZones}
                 tableNumber={tableNumber || undefined}
             />

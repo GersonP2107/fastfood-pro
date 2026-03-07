@@ -5,7 +5,7 @@
 // ============================================================================
 
 import { useState } from 'react';
-import { X, Check, Plus, Minus } from 'lucide-react';
+import { X, Check, Plus } from 'lucide-react';
 import type { Product, Modifier } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 

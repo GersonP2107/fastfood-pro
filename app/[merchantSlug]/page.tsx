@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Businessman } from '@/lib/types';
 import { Metadata } from 'next';
+import Link from 'next/link';
 
 interface PageProps {
     params: Promise<{ merchantSlug: string }>;
@@ -47,6 +48,7 @@ export default async function MerchantPage(props: PageProps) {
         .select('*')
         .eq('slug', params.merchantSlug)
         .eq('is_active', true)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .single() as { data: Businessman | null; error: any };
 
     if (error || !businessman) {
@@ -71,9 +73,9 @@ export default async function MerchantPage(props: PageProps) {
                         Si eres el propietario, por favor ingresa a tu panel para regularizar el estado de tu suscripción.
                     </p>
                     <div className="mt-6">
-                        <a href="/login" className="text-[#fa0050] hover:text-[#d4003e] font-medium text-sm">
+                        <Link href="/login" className="text-[#fa0050] hover:text-[#d4003e] font-medium text-sm">
                             Ir al Panel de Control &rarr;
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -81,7 +83,7 @@ export default async function MerchantPage(props: PageProps) {
     }
 
     // Fetch delivery zones for this businessman
-    // Casting to any to avoid "No overload matches this call" due to missing type definition for delivery_zones in generated types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: deliveryZones } = await (supabase as any)
         .from('delivery_zones')
         .select('*')
@@ -90,6 +92,7 @@ export default async function MerchantPage(props: PageProps) {
         .order('delivery_cost', { ascending: true });
 
     // Fetch payment methods from the new table
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: paymentMethodsData } = await (supabase as any)
         .from('payment_methods')
         .select('*')
@@ -98,12 +101,14 @@ export default async function MerchantPage(props: PageProps) {
 
     // Map the new table data to the simplified structure expected by the frontend
     if (paymentMethodsData && paymentMethodsData.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         businessman.payment_methods = paymentMethodsData.map((pm: any) => ({
             ...pm,
-            number: pm.account_number || pm.number // Map account_number to number for frontend compatibility
+            number: pm.account_number || pm.number
         }));
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return <MerchantMenuClient businessman={businessman} deliveryZones={deliveryZones as any[] || []} />;
 }
 

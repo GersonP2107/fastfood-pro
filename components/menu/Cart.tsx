@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/lib/cart-store';
 import { formatCurrency, checkBusinessStatus } from '@/lib/utils';
-import Link from 'next/link';
+
 import { CheckoutSummary } from '@/components/menu/CheckoutSummary';
 import { Businessman, DeliveryZone, Product } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
@@ -107,6 +107,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
             };
             fetchSuggestions();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, items.length, businessman.id, suggestedProducts.length]);
 
     // Lock body scroll when any modal/drawer is open
@@ -331,27 +332,25 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                             className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
                         >
                             {/* Header */}
-                            <header className="pt-4 pb-2 px-2 shrink-0 bg-white z-10">
-                                <div className="bg-white p-4 flex items-center justify-between shadow-[0_0_10px_rgba(0,0,0,0.1)] rounded-full mx-[10px]">
-                                    <motion.div
-                                        initial={{ x: -20, opacity: 0 }}
-                                        animate={{ x: 0, opacity: 1 }}
-                                        transition={{ delay: 0.2 }}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <ShoppingBag className="w-5 h-5 text-gray-800" />
-                                        <h4 className="text-xl font-bold ">Tu Pedido</h4>
-                                    </motion.div>
-                                    <motion.button
-                                        onClick={() => setIsOpen(false)}
-                                        whileHover={{ rotate: 90, scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
-                                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                                    >
-                                        <X className="w-6 h-6 text-gray-500" />
-                                    </motion.button>
-                                </div>
-                            </header>
+                            <div className="bg-white p-4 flex items-center justify-between shadow-[0_0_10px_rgba(0,0,0,0.1)]">
+                                <motion.div
+                                    initial={{ x: -20, opacity: 0 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="flex items-center gap-2"
+                                >
+                                    <ShoppingBag className="w-5 h-5 text-gray-800" />
+                                    <h3 className="text-lg font-bold ">Tu Pedido</h3>
+                                </motion.div>
+                                <motion.button
+                                    onClick={() => setIsOpen(false)}
+                                    whileHover={{ rotate: 90, scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                                >
+                                    <X className="w-6 h-6 text-gray-500" />
+                                </motion.button>
+                            </div>
 
                             {/* Cart Items */}
                             <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
@@ -392,6 +391,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                     <div className="flex items-start justify-between mb-2">
                                                         <div className="flex items-center gap-3 flex-1 pr-4">
                                                             {item.product.image_url ? (
+                                                                // eslint-disable-next-line @next/next/no-img-element
                                                                 <img
                                                                     src={item.product.image_url}
                                                                     alt={item.product.name}
@@ -490,9 +490,10 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                                                 {/* Horizontal Scroll Area */}
                                                 <div className="flex overflow-x-auto gap-4 pb-6 pt-2 -mx-4 px-4 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                                                     {suggestedProducts.map((product) => (
-                                                        <div key={product.id} className="min-w-[130px] w-[130px] snap-start flex flex-col group cursor-pointer" onClick={() => addItem(product, [])}>
+                                                        <div key={product.id} className="min-w-[130px] w-[130px] snap-start flex flex-col group cursor-pointer p-2 rounded-[24px] shadow-sm" onClick={() => addItem(product, [])}>
                                                             <div className="relative aspect-square mb-2.5 bg-gray-50 rounded-[20px] overflow-hidden transition-all duration-300">
                                                                 {product.image_url ? (
+                                                                    // eslint-disable-next-line @next/next/no-img-element
                                                                     <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                                                                 ) : (
                                                                     <div className="w-full h-full flex items-center justify-center text-3xl">🥤</div>

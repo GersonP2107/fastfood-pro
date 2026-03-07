@@ -85,6 +85,7 @@ export function MenuDisplay({
         }
 
         fetchMenuData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [businessmanId, initialProducts.length, initialCategories.length]);
 
     // Filter products by selected category
@@ -163,7 +164,7 @@ export function MenuDisplay({
                         >
                             {productosPorCategoria
                                 .filter((group) => group.productos.length > 0)
-                                .map((group, groupIndex) => (
+                                .map((group) => (
                                     <div key={group.categoria.id}>
                                         <motion.h2
                                             initial={{ opacity: 0, x: -20 }}
