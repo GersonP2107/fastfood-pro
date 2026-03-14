@@ -150,9 +150,9 @@ export default async function POSPage({ params }: PageProps) {
     return (
         <POSMenuClient
             businessman={businessman}
-            categories={categories || []}
-            products={products || [] as any}
-            deliveryZones={deliveryZones as any || []}
+            categories={(categories as any) || []}
+            products={(products as any) || []}
+            deliveryZones={(deliveryZones as any) || []}
         />
     );
 }

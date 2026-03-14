@@ -102,7 +102,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                     } else {
                         finalSuggestions = finalSuggestions.slice(0, 5);
                     }
-                    setSuggestedProducts(finalSuggestions);
+                    setSuggestedProducts(finalSuggestions as any[]);
                 }
             };
             fetchSuggestions();

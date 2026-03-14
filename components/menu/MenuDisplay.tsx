@@ -74,8 +74,8 @@ export function MenuDisplay({
 
                 if (productsError) throw productsError;
 
-                setCategorias(categoriasData || []);
-                setProductos(productsData || []);
+                setCategorias((categoriasData as any[]) || []);
+                setProductos((productsData as any[]) || []);
             } catch (err) {
                 console.error('Error fetching menu data:', err);
                 setError('Error al cargar el menú. Por favor, intenta de nuevo.');
