@@ -137,7 +137,7 @@ export function ProductCard({ product }: ProductCardProps) {
                                             initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
                                             animate={{
                                                 opacity: 0,
-                                                scale: 0,
+                                                scale: 0.95,
                                                 x: Math.cos((i * 60) * Math.PI / 180) * 40,
                                                 y: Math.sin((i * 60) * Math.PI / 180) * 40
                                             }}
@@ -161,7 +161,7 @@ export function ProductCard({ product }: ProductCardProps) {
                                 {/* Ripple effect */}
                                 {isAdding && (
                                     <motion.div
-                                        initial={{ scale: 0, opacity: 0.5 }}
+                                        initial={{ scale: 0.95, opacity: 0 }}
                                         animate={{ scale: 2, opacity: 0 }}
                                         transition={{ duration: 0.6 }}
                                         className="absolute inset-0 bg-white rounded-full"

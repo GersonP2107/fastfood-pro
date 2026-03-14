@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
+import Image from 'next/image';
 
 export function HeroSection() {
     return (
@@ -37,9 +38,17 @@ export function HeroSection() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6"
+                        className="flex justify-center mb-6"
                     >
-                        FoodFast <span className="text-transparent bg-clip-text bg-linear-to-r from-[#fa0050] to-[#ff3375]">Pro</span>
+                        <span className="sr-only">FoodFast Pro</span>
+                        <Image
+                            src="/logo-horizontal.svg"
+                            alt="FoodFast Pro"
+                            width={400}
+                            height={120}
+                            priority
+                            className="w-auto h-20 md:h-28"
+                        />
                     </motion.h1>
 
                     <motion.p

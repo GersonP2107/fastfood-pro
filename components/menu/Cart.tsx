@@ -102,6 +102,7 @@ export function Cart({ businessman, deliveryZones, tableNumber, isPOS = false, z
                     } else {
                         finalSuggestions = finalSuggestions.slice(0, 5);
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     setSuggestedProducts(finalSuggestions as any[]);
                 }
             };

@@ -20,10 +20,13 @@ interface MenuDisplayProps {
     compactMode?: boolean;
 }
 
+const EMPTY_CATEGORIES: Category[] = [];
+const EMPTY_PRODUCTS: Product[] = [];
+
 export function MenuDisplay({
     businessmanId,
-    initialCategories = [],
-    initialProducts = [],
+    initialCategories = EMPTY_CATEGORIES,
+    initialProducts = EMPTY_PRODUCTS,
     compactMode = false
 }: MenuDisplayProps) {
     const [productos, setProductos] = useState<Product[]>(initialProducts);
@@ -74,7 +77,9 @@ export function MenuDisplay({
 
                 if (productsError) throw productsError;
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 setCategorias((categoriasData as any[]) || []);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 setProductos((productsData as any[]) || []);
             } catch (err) {
                 console.error('Error fetching menu data:', err);

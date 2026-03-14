@@ -119,7 +119,6 @@ export function CategoryFilter({
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Buscar productos..."
-                                    autoFocus
                                     className="w-full px-4 py-2 border-2 border-gray-200 rounded-full focus:outline-none focus:border-[#fa0050] transition-colors"
                                 />
                             </div>

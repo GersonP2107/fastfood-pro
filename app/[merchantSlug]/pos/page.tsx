@@ -115,37 +115,41 @@ export default async function POSPage({ params }: PageProps) {
     // Attach reconstructed zones to businessman
     businessman.zones = zonesWithTables;
 
-    // 4. Fetch Categories
-    const { data: categories } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('businessman_id', businessman.id)
-        .eq('is_active', true)
-        .order('order', { ascending: true });
-
-    // 5. Fetch Products
-    const { data: products } = await supabase
-        .from('products')
-        .select(`
-            *,
-            category:categories(id, name),
-            product_modifiers(
-                id,
-                is_required,
-                modifier:modifiers(*)
-            )
-        `)
-        .eq('businessman_id', businessman.id)
-        .eq('is_available', true)
-        .is('deleted_at', null)
-        .order('order', { ascending: true });
-
-    // 6. Fetch Delivery Zones
-    const { data: deliveryZones } = await supabase
-        .from('delivery_zones' as any)
-        .select('*')
-        .eq('businessman_id', businessman.id)
-        .eq('is_active', true);
+    // 4. Fetch Categories, Products, and Delivery Zones in Parallel
+    const [
+        { data: categories },
+        { data: products },
+        { data: deliveryZones }
+    ] = await Promise.all([
+        supabase
+            .from('categories')
+            .select('*')
+            .eq('businessman_id', businessman.id)
+            .eq('is_active', true)
+            .order('order', { ascending: true }),
+        
+        supabase
+            .from('products')
+            .select(`
+                *,
+                category:categories(id, name),
+                product_modifiers(
+                    id,
+                    is_required,
+                    modifier:modifiers(*)
+                )
+            `)
+            .eq('businessman_id', businessman.id)
+            .eq('is_available', true)
+            .is('deleted_at', null)
+            .order('order', { ascending: true }),
+            
+        supabase
+            .from('delivery_zones' as any)
+            .select('*')
+            .eq('businessman_id', businessman.id)
+            .eq('is_active', true)
+    ]);
 
     return (
         <POSMenuClient

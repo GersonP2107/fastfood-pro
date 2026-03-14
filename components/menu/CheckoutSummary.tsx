@@ -272,8 +272,8 @@ export function CheckoutSummary({
                                         className="flex-1 bg-transparent font-semibold text-gray-900 leading-tight focus:outline-none appearance-none"
                                     >
                                         <option value="" disabled>Seleccionar pago</option>
-                                        {activePaymentMethods.map((pm, index) => (
-                                            <option key={index} value={pm.name}>
+                                        {activePaymentMethods.map((pm) => (
+                                            <option key={pm.name} value={pm.name}>
                                                 {pm.name}
                                             </option>
                                         ))}

@@ -363,7 +363,6 @@ export function AddressForm({
                                                     onChange={e => setCustomLabel(e.target.value)}
                                                     placeholder="Escribe el nombre de esta dirección"
                                                     className="w-full px-4 py-3 bg-[#f8f9fa] border border-transparent rounded-[14px] focus:outline-none focus:border-[#fa0050] text-sm transition-colors"
-                                                    autoFocus
                                                 />
                                             )}
                                             {errors.label && <p className="text-xs text-red-500">{errors.label}</p>}

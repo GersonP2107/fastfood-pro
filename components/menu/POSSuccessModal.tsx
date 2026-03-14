@@ -13,14 +13,14 @@ export function POSSuccessModal({ isOpen, onClose }: POSSuccessModalProps) {
             {isOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-70 flex items-center justify-center p-4">
                     <motion.div
-                        initial={{ scale: 0.5, opacity: 0 }}
+                        initial={{ scale: 0.95, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.5, opacity: 0 }}
+                        exit={{ scale: 0.95, opacity: 0 }}
                         transition={{ type: "spring", damping: 15 }}
                         className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center"
                     >
                         <motion.div
-                            initial={{ scale: 0 }}
+                            initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                             className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"

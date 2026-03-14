@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, MapPin, UtensilsCrossed, X } from 'lucide-react';
+import { Search, MapPin, SlidersHorizontal, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface BusinessFiltersProps {
     onFilterChange: (filters: FilterState) => void;
@@ -15,18 +16,18 @@ export interface FilterState {
 }
 
 const BUSINESS_TYPES = [
-    { value: 'hamburguesas', label: '🍔 Hamburguesas', emoji: '🍔' },
-    { value: 'pizza', label: '🍕 Pizza', emoji: '🍕' },
-    { value: 'comida_rapida', label: '🍟 Comida Rápida', emoji: '🍟' },
-    { value: 'pollo', label: '🍗 Pollo', emoji: '🍗' },
-    { value: 'asados', label: '🥩 Asados', emoji: '🥩' },
-    { value: 'comida_mexicana', label: '🌮 Mexicana', emoji: '🌮' },
-    { value: 'sushi', label: '🍣 Sushi', emoji: '🍣' },
-    { value: 'postres', label: '🍰 Postres', emoji: '🍰' },
-    { value: 'bebidas', label: '🥤 Bebidas', emoji: '🥤' },
-    { value: 'panaderia', label: '🥖 Panadería', emoji: '🥖' },
-    { value: 'comida_saludable', label: '🥗 Saludable', emoji: '🥗' },
-    { value: 'mariscos', label: '🦐 Mariscos', emoji: '🦐' },
+    { value: 'hamburguesas', label: '🍔  Hamburguesas' },
+    { value: 'pizza', label: '🍕  Pizza' },
+    { value: 'comida_rapida', label: '🍟  Comida Rápida' },
+    { value: 'pollo', label: '🍗  Pollo' },
+    { value: 'asados', label: '🥩  Asados' },
+    { value: 'comida_mexicana', label: '🌮  Mexicana' },
+    { value: 'sushi', label: '🍣  Sushi' },
+    { value: 'postres', label: '🍰  Postres' },
+    { value: 'bebidas', label: '🥤  Bebidas' },
+    { value: 'panaderia', label: '🥖  Panadería' },
+    { value: 'comida_saludable', label: '🥗  Saludable' },
+    { value: 'mariscos', label: '🦐  Mariscos' },
 ];
 
 const CITIES = [
@@ -50,6 +51,8 @@ export function BusinessFilters({ onFilterChange }: BusinessFiltersProps) {
         selectedZone: '',
     });
 
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
     const updateFilter = (key: keyof FilterState, value: string) => {
         const newFilters = { ...filters, [key]: value };
         setFilters(newFilters);
@@ -67,113 +70,144 @@ export function BusinessFilters({ onFilterChange }: BusinessFiltersProps) {
         onFilterChange(emptyFilters);
     };
 
-    const hasActiveFilters =
-        filters.searchTerm ||
-        filters.selectedCity ||
-        filters.selectedType ||
-        filters.selectedZone;
+    const hasAdvancedFilters = filters.selectedCity || filters.selectedZone;
+    const hasAnyFilters = filters.searchTerm || hasAdvancedFilters || filters.selectedType;
 
     return (
-        <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 mb-12">
-            {/* Search Bar */}
-            <div className="mb-8">
-                <div className="relative max-w-2xl mx-auto">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-[#fa0050] transition-colors" />
+        <div className="bg-white/95 backdrop-blur-md rounded-[32px] shadow-[0_2px_30px_rgb(0,0,0,0.05)] p-4 md:p-6 mb-12">
+            {/* Top Bar: Search and Settings Toggle */}
+            <div className="flex items-center gap-3 w-full mb-6">
+                <div className="relative flex-1">
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                         type="search"
-                        placeholder="¿Qué se te antoja hoy? (Ej: Hamburguesa, Sushi...)"
+                        placeholder="Buscar por nombre (Ej: Casa del Sabor...)"
                         value={filters.searchTerm}
                         onChange={(e) => updateFilter('searchTerm', e.target.value)}
-                        className="w-full pl-16 pr-6 py-4 bg-gray-50/50 hover:bg-white border-0 rounded-full focus:ring-4 focus:ring-rose-100/50 focus:bg-white outline-none transition-all text-lg shadow-[0_2px_15px_rgb(0,0,0,0.05)] placeholder:text-gray-400"
+                        className="w-full pl-14 pr-5 py-3.5 bg-gray-50 border-0 rounded-full focus:ring-2 focus:ring-[#fa0050]/20 focus:bg-white outline-none transition-all text-sm shadow-sm placeholder:text-gray-400"
                     />
                 </div>
+                <button
+                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                    className={`p-3.5 rounded-full transition-colors shrink-0 shadow-sm ${showAdvancedFilters || hasAdvancedFilters
+                        ? 'bg-[#fa0050] text-white'
+                        : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                        }`}
+                >
+                    <SlidersHorizontal className="w-5 h-5" />
+                </button>
             </div>
 
-            {/* Filter Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-4xl mx-auto">
-                {/* City Filter */}
-                <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">
-                        <MapPin className="w-4 h-4 inline mr-1 text-[#fa0050]" />
-                        Ciudad
-                    </label>
-                    <div className="relative">
-                        <select
-                            value={filters.selectedCity}
-                            onChange={(e) => updateFilter('selectedCity', e.target.value)}
-                            className="w-full pl-4 pr-10 py-3 bg-gray-50/50 border-0 rounded-xl focus:ring-2 focus:ring-[#fa0050]/20 focus:bg-white outline-none transition-all appearance-none cursor-pointer hover:bg-white shadow-[0_2px_10px_rgb(0,0,0,0.03)]"
-                        >
-                            <option value="">Todas las ciudades</option>
-                            {CITIES.map((city) => (
-                                <option key={city} value={city}>
-                                    {city}
-                                </option>
-                            ))}
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
+            {/* Advanced Filters Section - Animated */}
+            <AnimatePresence>
+                {showAdvancedFilters && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6 border-b border-gray-100 mb-2">
+                            {/* City Filter */}
+                            <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                                    <MapPin className="w-4 h-4 text-[#fa0050]" />
+                                </div>
+                                <select
+                                    value={filters.selectedCity}
+                                    onChange={(e) => updateFilter('selectedCity', e.target.value)}
+                                    className="w-full pl-11 pr-10 py-3 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-[#fa0050]/20 focus:bg-white outline-none transition-all appearance-none cursor-pointer text-sm font-medium text-gray-700"
+                                >
+                                    <option value="">Todas las ciudades</option>
+                                    {CITIES.map((city) => (
+                                        <option key={city} value={city}>
+                                            {city}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            {/* Delivery Zone Filter */}
+                            <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                                    <MapPin className="w-4 h-4 text-[#fa0050]" />
+                                </div>
+                                <input
+                                    type="search"
+                                    placeholder="Zona de entrega (Ej: El Poblado)..."
+                                    value={filters.selectedZone}
+                                    onChange={(e) => updateFilter('selectedZone', e.target.value)}
+                                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-[#fa0050]/20 focus:bg-white outline-none transition-all text-sm font-medium text-gray-700 placeholder:text-gray-500 placeholder:font-normal"
+                                />
+                            </div>
                         </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Category Tabs - Horizontal Scroll (Matching the Menu style) */}
+            <div className="relative mt-2">
+                <div className="flex-1 overflow-x-auto scrollbar-hide -mx-4 px-4 md:-mx-6 md:px-6">
+                    <div className="flex gap-6 min-w-max items-center h-full pb-2">
+                        {/* All Categories Tab */}
+                        <motion.button
+                            onClick={() => updateFilter('selectedType', '')}
+                            className={`relative py-2 px-1 transition-colors uppercase tracking-wider ${!filters.selectedType
+                                ? 'text-gray-900 font-black text-sm'
+                                : 'text-gray-400 font-semibold text-sm hover:text-gray-700'
+                                }`}
+                        >
+                            TODOS
+                            {!filters.selectedType && (
+                                <motion.div
+                                    layoutId="activeBusinessTab"
+                                    className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[4px] w-6 bg-[#fa0050] rounded-t-full"
+                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                />
+                            )}
+                        </motion.button>
+
+                        {/* Category Tabs */}
+                        {BUSINESS_TYPES.map((type) => (
+                            <motion.button
+                                key={type.value}
+                                onClick={() => updateFilter('selectedType', type.value)}
+                                className={`relative py-2 px-1 transition-colors uppercase tracking-wider ${filters.selectedType === type.value
+                                    ? 'text-gray-900 font-black text-sm'
+                                    : 'text-gray-400 font-semibold text-sm hover:text-gray-700'
+                                    }`}
+                            >
+                                {type.label}
+                                {filters.selectedType === type.value && (
+                                    <motion.div
+                                        layoutId="activeBusinessTab"
+                                        className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[4px] w-6 bg-[#fa0050] rounded-t-full"
+                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                    />
+                                )}
+                            </motion.button>
+                        ))}
                     </div>
                 </div>
-
-                {/* Delivery Zone Filter */}
-                <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">
-                        <MapPin className="w-4 h-4 inline mr-1 text-[#fa0050]" />
-                        Zona de entrega
-                    </label>
-                    <input
-                        type="search"
-                        placeholder="Ej: El Poblado, Chapinero..."
-                        value={filters.selectedZone}
-                        onChange={(e) => updateFilter('selectedZone', e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-50/50 border-0 rounded-xl focus:ring-2 focus:ring-[#fa0050]/20 focus:bg-white outline-none transition-all hover:bg-white shadow-[0_2px_10px_rgb(0,0,0,0.03)]"
-                    />
-                </div>
             </div>
 
-            {/* Clear Filters Button - centered below inputs */}
-            {hasActiveFilters && (
-                <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-top-2">
+            {hasAnyFilters && (
+                <div className="flex justify-center mt-6 pt-4 border-t border-gray-100">
                     <button
                         onClick={clearFilters}
-                        className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors font-medium flex items-center gap-2 text-sm"
+                        className="px-5 py-2 bg-gray-50 hover:bg-gray-100 text-gray-500 rounded-full transition-colors font-medium flex items-center gap-2 text-xs uppercase tracking-wider"
                     >
-                        <X className="w-4 h-4" />
-                        Limpiar todos los filtros
+                        <X className="w-3.5 h-3.5" />
+                        Limpiar Búsqueda
                     </button>
                 </div>
             )}
-
-            {/* Business Type Filter - Chips */}
-            <div className="border-t border-gray-100 pt-8">
-                <label className="block text-sm font-bold text-gray-700 mb-4 text-center">
-                    <UtensilsCrossed className="w-4 h-4 inline mr-2 text-[#fa0050]" />
-                    Explora por categorías
-                </label>
-                <div className="flex flex-wrap gap-3 justify-center">
-                    {BUSINESS_TYPES.map((type) => (
-                        <button
-                            key={type.value}
-                            onClick={() =>
-                                updateFilter(
-                                    'selectedType',
-                                    filters.selectedType === type.value ? '' : type.value
-                                )
-                            }
-                            className={`px-5 py-2.5 rounded-full font-medium transition-all duration-200 border ${filters.selectedType === type.value
-                                ? 'bg-[#fa0050] text-white border-[#d4003e] shadow-md transform -translate-y-1'
-                                : 'bg-white text-gray-600 border-gray-200 hover:border-rose-200 hover:bg-rose-50'
-                                }`}
-                        >
-                            <span className="mr-2">{type.emoji}</span>
-                            {type.label.split(' ').slice(1).join(' ')}
-                        </button>
-                    ))}
-                </div>
-            </div>
         </div>
     );
 }

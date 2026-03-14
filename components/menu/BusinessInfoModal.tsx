@@ -130,7 +130,9 @@ export function BusinessInfoModal({ isOpen, onClose, businessInfo, deliveryZones
                             <MessageCircle className="w-5 h-5 text-gray-600 group-hover:text-green-500 transition-colors" />
                         </a>
                         <a
-                            href="#"
+                            href="https://instagram.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="p-3 bg-[#f8f9fa] hover:bg-pink-50 rounded-full transition-colors group flex items-center justify-center border border-gray-100"
                             title="Instagram"
                         >
