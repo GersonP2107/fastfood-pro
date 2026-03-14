@@ -12,28 +12,41 @@ interface PageProps {
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// Favicon y metadata estáticos de la plataforma (fallback)
+const PLATFORM_FAVICON = '/favicon.svg';
+const PLATFORM_TITLE = 'FoodFast Pro - Menú Digital';
+
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
     const params = await props.params;
     const supabase = await createClient();
 
     const { data: businessman } = await supabase
         .from('businessmans')
-        .select('business_name, logo_url')
+        .select('business_name, logo_url, favicon_url')
         .eq('slug', params.merchantSlug)
         .single();
 
+    const businessName = businessman?.business_name;
+    const logoUrl = businessman?.logo_url;
+    // Si el negocio tiene favicon propio se usa, sino el de la plataforma
+    const faviconSrc = businessman?.favicon_url ?? PLATFORM_FAVICON;
+
     return {
-        title: businessman?.business_name ? `${businessman.business_name} - Menú Digital` : 'FoodFast Pro - Menú Digital',
-        icons: businessman?.logo_url ? {
-            icon: [
-                { url: businessman.logo_url, sizes: 'any' }
-            ],
-            shortcut: [
-                { url: businessman.logo_url }
-            ],
-            apple: [
-                { url: businessman.logo_url }
-            ],
+        title: businessName ? `${businessName} - Menú Digital` : PLATFORM_TITLE,
+
+        icons: {
+            icon: [{ url: faviconSrc, sizes: 'any' }],
+            shortcut: faviconSrc,
+            apple: [{ url: faviconSrc }],
+        },
+
+        // OpenGraph: cuando comparten el link por WhatsApp/redes, sale info del negocio
+        openGraph: businessName ? {
+            title: `${businessName} - Menú Digital`,
+            description: `Explora el menú digital de ${businessName} y realiza tu pedido en línea.`,
+            images: logoUrl ? [{ url: logoUrl, width: 512, height: 512, alt: `Logo de ${businessName}` }] : [],
+            locale: 'es_CO',
+            type: 'website',
         } : undefined,
     };
 }

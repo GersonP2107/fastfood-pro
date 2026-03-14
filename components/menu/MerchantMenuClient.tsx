@@ -133,19 +133,23 @@ export function MerchantMenuClient({ businessman, deliveryZones }: MerchantMenuC
                             />
                         </div>
 
-                        {/* Name & Address */}
-                        <div className="flex-1 pb-1">
+                        {/* Name, Description & Address */}
+                        <div className="flex-1 pb-1 min-w-0">
                             <h1 className="text-xl md:text-3xl lg:text-4xl font-black text-gray-900 leading-tight tracking-tight">
                                 {businessInfo.name}
                             </h1>
+
+                            {/* Description — visible en md+, texto más cálido y legible */}
                             {businessInfo.description && (
-                                <p className="hidden md:block text-sm text-gray-500 mt-1 leading-snug line-clamp-2">
+                                <p className="hidden md:block text-[14px] md:text-[15px] text-gray-600 mt-2 leading-relaxed line-clamp-2 font-normal italic border-l-2 border-[#fa0050]/30 pl-3">
                                     {businessInfo.description}
                                 </p>
                             )}
-                            <div className="flex items-start gap-1.5 text-sm text-gray-400 mt-1.5">
-                                <MapPin className="w-4 h-4 shrink-0 text-gray-300 mt-0.5" />
-                                <span className="leading-snug text-xs md:text-sm">
+
+                            {/* Address — pill separado visualmente */}
+                            <div className="inline-flex items-center gap-1.5 mt-3 bg-gray-100 rounded-full px-3 py-1">
+                                <MapPin className="w-3.5 h-3.5 shrink-0 text-[#fa0050]" />
+                                <span className="text-xs text-gray-500 font-medium leading-none truncate">
                                     {[businessInfo.address, businessInfo.city, businessInfo.department].filter(Boolean).join(', ')}
                                 </span>
                             </div>
