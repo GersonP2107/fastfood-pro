@@ -35,6 +35,10 @@ export interface Businessman {
     plan_type?: 'free' | 'essential' | 'premium' | 'enterprise'; // or plain string
     subscription_status?: 'active' | 'past_due' | 'canceled' | 'incomplete' | 'trialing';
     subscription_end?: string;
+    trial_ends_at?: string;
+
+    // Payment Gateway
+    payment_gateway: 'manual' | 'wompi';
 }
 
 export interface RestaurantZone {
@@ -160,6 +164,11 @@ export interface Order {
     notification_error?: string;
     created_at: string;
     updated_at: string;
+    // Payment Gateway
+    payment_status: 'pending' | 'approved' | 'declined' | 'voided' | 'error';
+    payment_gateway: 'manual' | 'wompi';
+    wompi_transaction_id?: string;
+    wompi_reference?: string;
     // Relations
     order_items?: OrderItem[];
 }
@@ -185,6 +194,22 @@ export interface OrderItemModifier {
     modifier_name: string;
     additional_price: number;
     created_at: string;
+}
+
+// ============================================================================
+// Payment Gateway Types
+// ============================================================================
+
+export interface WompiCredentials {
+    id: string;
+    businessman_id: string;
+    public_key: string;
+    events_secret: string;
+    integrity_secret: string;
+    environment: 'sandbox' | 'production';
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
 }
 
 // ============================================================================
@@ -234,6 +259,7 @@ export interface CreateOrderPayload {
     table_number?: string;
     delivery_notes?: string;
     payment_method: string;
+    payment_gateway?: 'manual' | 'wompi';
     subtotal: number;
     shipping_cost: number;
     discount: number;

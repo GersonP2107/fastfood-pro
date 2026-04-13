@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Businessman } from '@/lib/types';
 import { Metadata } from 'next';
-import Link from 'next/link';
 
 interface PageProps {
     params: Promise<{ merchantSlug: string }>;
@@ -71,24 +70,35 @@ export default async function MerchantPage(props: PageProps) {
     // Subscription Verification
     // "No permitiendo el uso del menu hasta que ya el pago alla sido renovado"
     const allowedStatuses = ['active', 'trialing'];
-    if (businessman.subscription_status && !allowedStatuses.includes(businessman.subscription_status)) {
+    let isSuspended = false;
+
+    if (businessman.subscription_status === 'past_due' || businessman.subscription_status === 'canceled') {
+        const trialActive = businessman.trial_ends_at && new Date(businessman.trial_ends_at) > new Date();
+        if (!trialActive) {
+            isSuspended = true;
+        }
+    } else if (businessman.subscription_status && !allowedStatuses.includes(businessman.subscription_status)) {
+        isSuspended = true;
+    }
+
+    if (isSuspended) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
                 <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg text-center">
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <span className="text-2xl text-red-600">⚠️</span>
                     </div>
-                    <h1 className="text-xl font-bold text-gray-900 mb-2">Servicio Suspendido</h1>
+                    <h1 className="text-xl font-bold text-gray-900 mb-2">Menú No Disponible</h1>
                     <p className="text-gray-500 mb-6">
-                        El servicio de menú digital para <strong>{businessman.business_name}</strong> se encuentra temporalmente suspendido.
+                        El menú digital para <strong>{businessman.business_name}</strong> no se encuentra disponible en este momento.
                     </p>
                     <p className="text-sm text-gray-400">
-                        Si eres el propietario, por favor ingresa a tu panel para regularizar el estado de tu suscripción.
+                        Si eres el propietario de este negocio, por favor ingresa a tu panel de administración en FoodFast Pro para regularizar el estado de tu pago y reactivar tu menú digital.
                     </p>
                     <div className="mt-6">
-                        <Link href="/login" className="text-[#fa0050] hover:text-[#d4003e] font-medium text-sm">
+                        <a href="https://app.foodfastpro.com/login" className="text-[#fa0050] hover:text-[#d4003e] font-medium text-sm">
                             Ir al Panel de Control &rarr;
-                        </Link>
+                        </a>
                     </div>
                 </div>
             </div>

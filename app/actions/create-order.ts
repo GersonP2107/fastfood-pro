@@ -60,7 +60,9 @@ export async function createOrder(payload: CreateOrderPayload): Promise<ApiRespo
                 tip: payload.tip,
                 total: payload.total,
                 status: 'pending',
-                notification_sent: false
+                notification_sent: false,
+                payment_gateway: payload.payment_gateway || 'manual',
+                payment_status: 'pending'
             } as any)
             .select()
             .single();

@@ -6,11 +6,13 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Zap } from 'lucide-react';
 import { useCartStore } from '@/lib/cart-store';
 import { formatCurrency, createWhatsAppMessage } from '@/lib/utils';
 import { Businessman, PaymentMethod } from '@/lib/types';
 import { createOrder } from '@/app/actions/create-order';
+import { WompiCheckout } from '@/components/menu/WompiCheckout';
+import { OrderSuccessState } from '@/components/menu/OrderSuccessState';
 
 interface CheckoutSummaryProps {
     isOpen: boolean;
@@ -44,6 +46,17 @@ export function CheckoutSummary({
     const [cashAmount, setCashAmount] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Wompi flow state
+    const [showWompiCheckout, setShowWompiCheckout] = useState(false);
+    const [wompiOrderId, setWompiOrderId] = useState<string | null>(null);
+    const [isWompiSuccess, setIsWompiSuccess] = useState(false);
+    const [wompiOrderNumber, setWompiOrderNumber] = useState<string | undefined>(undefined);
+    // In Wompi mode the customer can still choose to pay cash on delivery
+    const [wompiPaymentChoice, setWompiPaymentChoice] = useState<'wompi' | 'cash' | null>(null);
+
+    // Determine if this business uses Wompi
+    const isWompiEnabled = businessman.payment_gateway === 'wompi';
+
     // Get available payment methods from businessman or use defaults
     // Get available payment methods from businessman
     const paymentMethods: PaymentMethod[] = businessman.payment_methods || [];
@@ -56,7 +69,9 @@ export function CheckoutSummary({
     const total = subtotal + tip + shippingCost;
 
     const handleSubmitOrder = async () => {
-        if (!selectedPaymentMethod) return;
+        // Require a payment method selection
+        if (isWompiEnabled && !wompiPaymentChoice) return;
+        if (!isWompiEnabled && !selectedPaymentMethod) return;
 
         setIsSubmitting(true);
 
@@ -66,24 +81,24 @@ export function CheckoutSummary({
             address: deliveryAddress
         };
 
-        const paymentInfo = {
-            type: selectedPaymentMethod.type,
-            name: selectedPaymentMethod.name
-        };
-
         // 1. Persist Order to Database
         try {
-            const result = await createOrder({
+            const orderPayload = {
                 businessman_id: businessman.id,
                 client_name: customerName,
                 client_phone: customerPhone,
-                delivery_type: serviceType === 'takeout' ? 'pickup' : (serviceType === 'dine_in' ? 'dine_in' : 'delivery'),
+                delivery_type: serviceType === 'takeout' ? 'pickup' as const : (serviceType === 'dine_in' ? 'dine_in' as const : 'delivery' as const),
                 delivery_address: deliveryAddress,
                 table_number: tableNumber,
                 delivery_notes: comment + (cashAmount ? ` (Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''),
-                payment_method: selectedPaymentMethod.type === 'efectivo'
-                    ? `Efectivo ${cashAmount ? `(Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''}`
-                    : selectedPaymentMethod.name,
+                payment_method: isWompiEnabled
+                    ? (wompiPaymentChoice === 'cash'
+                        ? `Efectivo ${cashAmount ? `(Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''}`
+                        : 'wompi')
+                    : (selectedPaymentMethod!.type === 'efectivo'
+                        ? `Efectivo ${cashAmount ? `(Paga con: ${formatCurrency(parseInt(cashAmount) || 0)})` : ''}`
+                        : selectedPaymentMethod!.name),
+                payment_gateway: isWompiEnabled ? 'wompi' as const : 'manual' as const,
                 subtotal: subtotal,
                 shipping_cost: shippingCost,
                 discount: 0,
@@ -102,18 +117,35 @@ export function CheckoutSummary({
                         additional_price: mod.additional_price
                     }))
                 }))
-            });
+            };
+
+            const result = await createOrder(orderPayload);
 
             if (result.error) {
                 console.error('Order creation error:', result.error);
                 alert('Hubo un error al crear tu pedido. Por favor intenta de nuevo.');
                 setIsSubmitting(false);
-                return; // Stop execution if DB save fails
+                return;
             }
 
             console.log('Order created successfully:', result.data);
 
-            // 2. Create WhatsApp Message (Only if DB success)
+            // ── BIFURCATION: Wompi Digital vs Cash vs Manual ──
+            if (isWompiEnabled && wompiPaymentChoice === 'wompi') {
+                // Digital payment: open Wompi widget
+                setWompiOrderNumber(result.data?.orderNumber);
+                setWompiOrderId(result.data!.orderId);
+                setShowWompiCheckout(true);
+                setIsSubmitting(false);
+                return;
+            }
+
+
+            // ── WhatsApp Flow: Manual OR Wompi-Cash ──
+            const paymentInfo = isWompiEnabled && wompiPaymentChoice === 'cash'
+                ? { type: 'efectivo' as const, name: 'Efectivo al recibir' }
+                : { type: selectedPaymentMethod!.type, name: selectedPaymentMethod!.name };
+
             const message = createWhatsAppMessage(
                 items,
                 subtotal,
@@ -125,12 +157,9 @@ export function CheckoutSummary({
                 comment + (tableNumber ? `\n\n🍽️ Mesa: ${tableNumber}` : '') + (cashAmount ? `\n\n💵 Paga con: ${formatCurrency(parseInt(cashAmount) || 0)}` : '')
             );
 
-            // 3. Open WhatsApp
             const whatsappUrl = `https://api.whatsapp.com/send?phone=${businessman.whatsapp_number}&text=${message}`;
             window.open(whatsappUrl, '_blank');
 
-            // Close modal and clear cart after successful order
-            // clearCart(); // Uncomment if you want to clear cart
             onClose();
         } catch (error) {
             console.error('Failed to persist order:', error);
@@ -161,6 +190,18 @@ export function CheckoutSummary({
                         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
                         className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col overflow-y-auto"
                     >
+                        {isWompiSuccess ? (
+                            /* ── Success State ── */
+                            <div className="flex-1 bg-[#f8f9fa]">
+                                <OrderSuccessState
+                                    totalAmount={total}
+                                    paymentMethod="Wompi (Tarjeta/PSE)"
+                                    orderNumber={wompiOrderNumber}
+                                    onClose={onClose}
+                                />
+                            </div>
+                        ) : (
+                        <>
                         {/* Header */}
                         <div className="sticky top-0 bg-white p-4 flex items-center gap-3 z-10">
                             <button
@@ -261,69 +302,166 @@ export function CheckoutSummary({
                             </div>
 
                             {/* Payment Method */}
-                            <div className="bg-white shadow-sm rounded-[24px] p-4">
-                                <div className="flex items-center">
-                                    <div className="w-6 h-6 mr-3 text-gray-800 flex items-center justify-center">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
-                                    </div>
-                                    <select
-                                        value={selectedPaymentMethodId}
-                                        onChange={(e) => setSelectedPaymentMethodId(e.target.value)}
-                                        className="flex-1 bg-transparent font-semibold text-gray-900 leading-tight focus:outline-none appearance-none"
+                            {isWompiEnabled ? (
+                                /* Wompi Mode: dual choice */
+                                <div className="bg-white shadow-sm rounded-[24px] p-4 space-y-3">
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">¿Cómo quieres pagar?</p>
+
+                                    {/* Option 1 – Digital Wompi */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setWompiPaymentChoice('wompi')}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-2xl border-2 transition-all ${
+                                            wompiPaymentChoice === 'wompi'
+                                                ? 'border-[#fa0050] bg-[#fa0050]/5'
+                                                : 'border-gray-100 hover:border-gray-200'
+                                        }`}
                                     >
-                                        <option value="" disabled>Seleccionar pago</option>
-                                        {activePaymentMethods.map((pm) => (
-                                            <option key={pm.name} value={pm.name}>
-                                                {pm.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <ChevronRight className="w-5 h-5 text-gray-400 pointer-events-none" />
-                                </div>
-
-                                {/* Payment Instructions */}
-                                <AnimatePresence>
-                                    {selectedPaymentMethod && (selectedPaymentMethod.instructions || selectedPaymentMethod.type !== 'efectivo') && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            className="mt-4 bg-[#f8f9fa] rounded-[16px] p-4 overflow-hidden"
-                                        >
-                                            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                                                {selectedPaymentMethod.instructions || '💵 Paga en efectivo al momento de recibir tu pedido. Por favor ten el monto exacto listo.'}
-                                            </p>
-
-                                            {selectedPaymentMethod.number && (
-                                                <div className="mt-2 flex items-center gap-2">
-                                                    <span className="text-xs font-bold text-gray-500 uppercase">Cuenta:</span>
-                                                    <code className="text-sm font-bold text-gray-900">{selectedPaymentMethod.number}</code>
+                                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#fa0050] to-[#ff3375] flex items-center justify-center shrink-0">
+                                            <Zap className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div className="flex-1 text-left">
+                                            <p className="font-bold text-gray-900 text-sm">Tarjeta / PSE (Wompi)</p>
+                                            <p className="text-[11px] text-gray-400">Pago digital seguro e inmediato</p>
+                                        </div>
+                                        <div className={`w-5 h-5 rounded-full border-2 shrink-0 transition-all ${
+                                            wompiPaymentChoice === 'wompi'
+                                                ? 'border-[#fa0050] bg-[#fa0050]'
+                                                : 'border-gray-300'
+                                        }`}>
+                                            {wompiPaymentChoice === 'wompi' && (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <div className="w-2 h-2 rounded-full bg-white" />
                                                 </div>
                                             )}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                        </div>
+                                    </button>
 
-                                {/* Cash Amount Input (Only if cash is selected) */}
-                                <AnimatePresence>
-                                    {selectedPaymentMethod?.type === 'efectivo' && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            className="mt-4 overflow-hidden"
-                                        >
-                                            <input
-                                                type="number"
-                                                value={cashAmount}
-                                                placeholder="$ ¿Con cuánto vas a pagar?"
-                                                className="w-full px-4 py-3  bg-[#f8f9fa] border border-transparent rounded-[16px] focus:outline-none focus:ring-2 focus:ring-[#fa0050]/20 focus:border-[#fa0050] transition-all text-gray-900 font-semibold placeholder:font-normal placeholder:text-gray-400"
-                                                onChange={(e) => setCashAmount(e.target.value)}
-                                            />
-                                        </motion.div>
+                                    {/* Option 2 – Cash */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setWompiPaymentChoice('cash')}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-2xl border-2 transition-all ${
+                                            wompiPaymentChoice === 'cash'
+                                                ? 'border-emerald-500 bg-emerald-50'
+                                                : 'border-gray-100 hover:border-gray-200'
+                                        }`}
+                                    >
+                                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-emerald-600"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+                                        </div>
+                                        <div className="flex-1 text-left">
+                                            <p className="font-bold text-gray-900 text-sm">Efectivo al recibir</p>
+                                            <p className="text-[11px] text-gray-400">Paga en el momento de la entrega</p>
+                                        </div>
+                                        <div className={`w-5 h-5 rounded-full border-2 shrink-0 transition-all ${
+                                            wompiPaymentChoice === 'cash'
+                                                ? 'border-emerald-500 bg-emerald-500'
+                                                : 'border-gray-300'
+                                        }`}>
+                                            {wompiPaymentChoice === 'cash' && (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <div className="w-2 h-2 rounded-full bg-white" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </button>
+
+                                    {/* Cash amount input  */}
+                                    <AnimatePresence>
+                                        {wompiPaymentChoice === 'cash' && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <input
+                                                    type="number"
+                                                    value={cashAmount}
+                                                    placeholder="$ ¿Con cuánto vas a pagar?"
+                                                    className="w-full px-4 py-3 bg-[#f8f9fa] border border-transparent rounded-[16px] focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400 transition-all text-gray-900 font-semibold placeholder:font-normal placeholder:text-gray-400"
+                                                    onChange={(e) => setCashAmount(e.target.value)}
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* Wompi info hint */}
+                                    {wompiPaymentChoice === 'wompi' && (
+                                        <div className="bg-emerald-50 rounded-xl px-3 py-2">
+                                            <p className="text-[11px] text-emerald-700 font-medium leading-relaxed">
+                                                Se abrirá la ventana segura de Wompi para completar el pago con tarjeta de crédito/débito o PSE.
+                                            </p>
+                                        </div>
                                     )}
-                                </AnimatePresence>
-                            </div>
+                                </div>
+                            ) : (
+                                /* Manual Payment Selector */
+                                <div className="bg-white shadow-sm rounded-[24px] p-4">
+                                    <div className="flex items-center">
+                                        <div className="w-6 h-6 mr-3 text-gray-800 flex items-center justify-center">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+                                        </div>
+                                        <select
+                                            value={selectedPaymentMethodId}
+                                            onChange={(e) => setSelectedPaymentMethodId(e.target.value)}
+                                            className="flex-1 bg-transparent font-semibold text-gray-900 leading-tight focus:outline-none appearance-none"
+                                        >
+                                            <option value="" disabled>Seleccionar pago</option>
+                                            {activePaymentMethods.map((pm) => (
+                                                <option key={pm.name} value={pm.name}>
+                                                    {pm.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <ChevronRight className="w-5 h-5 text-gray-400 pointer-events-none" />
+                                    </div>
+
+                                    {/* Payment Instructions */}
+                                    <AnimatePresence>
+                                        {selectedPaymentMethod && (selectedPaymentMethod.instructions || selectedPaymentMethod.type !== 'efectivo') && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="mt-4 bg-[#f8f9fa] rounded-[16px] p-4 overflow-hidden"
+                                            >
+                                                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                                    {selectedPaymentMethod.instructions || '💵 Paga en efectivo al momento de recibir tu pedido. Por favor ten el monto exacto listo.'}
+                                                </p>
+
+                                                {selectedPaymentMethod.number && (
+                                                    <div className="mt-2 flex items-center gap-2">
+                                                        <span className="text-xs font-bold text-gray-500 uppercase">Cuenta:</span>
+                                                        <code className="text-sm font-bold text-gray-900">{selectedPaymentMethod.number}</code>
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* Cash Amount Input (Only if cash is selected) */}
+                                    <AnimatePresence>
+                                        {selectedPaymentMethod?.type === 'efectivo' && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="mt-4 overflow-hidden"
+                                            >
+                                                <input
+                                                    type="number"
+                                                    value={cashAmount}
+                                                    placeholder="$ ¿Con cuánto vas a pagar?"
+                                                    className="w-full px-4 py-3  bg-[#f8f9fa] border border-transparent rounded-[16px] focus:outline-none focus:ring-2 focus:ring-[#fa0050]/20 focus:border-[#fa0050] transition-all text-gray-900 font-semibold placeholder:font-normal placeholder:text-gray-400"
+                                                    onChange={(e) => setCashAmount(e.target.value)}
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            )}
 
                             {/* Totals Summary */}
                             <div className="pt-2 pb-8 space-y-2 px-1">
@@ -355,20 +493,49 @@ export function CheckoutSummary({
                                 </div>
                                 <motion.button
                                     onClick={handleSubmitOrder}
-                                    disabled={!selectedPaymentMethod || isSubmitting}
+                                    disabled={(isWompiEnabled ? !wompiPaymentChoice : !selectedPaymentMethod) || isSubmitting}
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className={`py-3.5 px-10 rounded-[20px] font-bold text-lg transition-all ${(!selectedPaymentMethod || isSubmitting)
+                                    className={`py-3.5 px-10 rounded-[20px] font-bold text-lg transition-all ${
+                                        ((isWompiEnabled ? !wompiPaymentChoice : !selectedPaymentMethod) || isSubmitting)
                                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                         : 'bg-[#fa0050] hover:bg-[#d4003e] text-white shadow-[0_4px_15px_rgba(250,0,80,0.3)] shadow-[#fa0050]/30'
-                                        }`}
+                                    }`}
                                 >
-                                    {isSubmitting ? 'Procesando...' : 'Pagar'}
+                                    {isSubmitting
+                                        ? 'Procesando...'
+                                        : isWompiEnabled
+                                            ? (wompiPaymentChoice === 'cash' ? 'Confirmar Pedido' : wompiPaymentChoice === 'wompi' ? 'Pagar con Wompi' : 'Selecciona método')
+                                            : 'Pagar'}
                                 </motion.button>
                             </div>
                         </div>
+                        </>
+                        )}
                     </motion.div>
                 </>
+            )}
+
+            {/* Wompi Checkout Modal */}
+            {wompiOrderId && (
+                <WompiCheckout
+                    isOpen={showWompiCheckout}
+                    onClose={() => {
+                        setShowWompiCheckout(false);
+                        setWompiOrderId(null);
+                    }}
+                    onSuccess={() => {
+                        setShowWompiCheckout(false);
+                        // Trigger the success state UI
+                        setIsWompiSuccess(true);
+                    }}
+                    orderId={wompiOrderId}
+                    businessmanId={businessman.id}
+                    amountInCents={Math.round(total * 100)}
+                    customerEmail={undefined}
+                    customerName={customerName}
+                    businessName={businessman.business_name}
+                />
             )}
         </AnimatePresence>
     );
